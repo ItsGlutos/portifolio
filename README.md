@@ -6,7 +6,22 @@ O conteúdo segue o documento privado de contextualização de 13/11/2026. Esse 
 
 ![Prévia do site no desktop](docs/preview-desktop.png)
 
-## Como abrir
+## Versão React (atual)
+
+O site foi migrado para **Next.js 16 + React 19 + TypeScript**, com export estático, e vive em `web/`. A versão descrita no restante deste README é a original em HTML/CSS, mantida como referência de paridade visual.
+
+```bash
+cd web
+npm install
+npm run dev      # http://localhost:3000
+npm run build    # gera web/out (HTML por rota + sitemap + OG image)
+```
+
+O que mudou: conteúdo tipado em `content/`, interações em componentes React, fontes WOFF2 com subset (432 KB → 86 KB), SVGs otimizados, metadados/JSON-LD/sitemap por rota, Lenis + GSAP sob demanda e axe no CI. Os CTAs usam o **Magnet** e o CTA do header usa o **StarBorder** do React Bits (código-fonte local, sem dependência nova), e o céu ganhou uma **estrela cadente** rara — a primeira depois de 8–13 s, as seguintes a cada 34–76 s. A paridade visual foi medida em 0,019% (1440), 0,032% (834) e 0,065% (390) de pixels diferentes.
+
+Detalhes: [`web/README.md`](web/README.md) · estudo: [`docs/react/PLANO-REACT.md`](docs/react/PLANO-REACT.md) · resultado: [`docs/react/RESULTADO.md`](docs/react/RESULTADO.md).
+
+## Como abrir (versão original)
 
 ```bash
 cd portifolio
@@ -45,6 +60,12 @@ tools/shot.py                 captura as telas da réplica (Selenium + Edge head
 tools/site_shots.py           captura o portfólio em desktop, tablet e mobile
 tools/render_direcoes.py      renderiza as direções em 1440×1024 fora do canvas
 tools/type_audit.py           auditoria tipográfica: emoji, nomes e texto duplamente codificado
+tools/serve_out.py            serve web/out (e simula a subpasta do Pages com --base)
+tools/qa_next.py              QA do export React: filtro, menu, âncoras, aviso mobile, metas
+tools/a11y_next.py            axe-core na home, no PagFlow e no diálogo de mobile
+tools/vitals_next.py          FCP, LCP, CLS, TBT e peso transferido do export
+tools/mobile_audit.py         auditoria mobile: rolagem horizontal, alvos < 44 px e capturas
+.github/workflows/pages.yml   prévia do site React no GitHub Pages
 ```
 
 ## O que editar primeiro
@@ -149,7 +170,31 @@ Teste em 360, 390, 768, 1024 e 1440px, com teclado (Tab/Shift+Tab) e com “redu
 
 ## Publicar
 
-É um site estático: publique a pasta inteira em GitHub Pages, Netlify, Vercel ou Cloudflare Pages. Se usar GitHub Pages na raiz do repositório, o `index.html` já é a entrada. Não é preciso build. O link do cartão do PagFlow (`pagflow/index.html`) já é uma página do próprio site e continua funcionando publicada.
+O site atual é o React em `web/` (export estático). Há dois destinos com papéis
+diferentes — o passo a passo completo está em [`web/DEPLOY.md`](web/DEPLOY.md):
+
+- **GitHub Pages — prévia para visualização.** O workflow `.github/workflows/pages.yml`
+  compila com `npm run build:pages` (basePath `/portifolio`, `noindex`, `.nojekyll`)
+  e publica em `https://itsglutos.github.io/portifolio/`. Antes, ligue em
+  **Settings → Pages → Source: GitHub Actions**.
+- **Vercel — site de verdade.** Importe o repositório com **Root Directory = `web`**;
+  o Next.js é detectado e o `web/vercel.json` cuida de headers, cache e
+  `trailingSlash`. Com domínio próprio, defina `NEXT_PUBLIC_SITE_URL` e refaça o
+  deploy. Import de produção sai indexável; previews da Vercel saem `noindex`.
+
+A versão original em HTML (`index.html` + `assets/` + `pagflow/`) continua
+publicável na raiz do repositório, sem build, como referência de paridade. O link
+do cartão do PagFlow é relativo (`pagflow/`), então funciona tanto na raiz quanto
+na subpasta do Pages.
+
+## Aviso de mobile no PagFlow
+
+A réplica do PagFlow é uma janela de desktop (1280 × 960). Em tela pequena ela
+fica com ~27% do tamanho original: texto ilegível e controles fora de alcance.
+Por isso o site avisa em dois momentos: uma nota no cartão em destaque (até
+900 px) e, ao tocar em “Abrir o app interativo”, um diálogo nativo que explica o
+limite e deixa continuar. A própria réplica (`pagflow/index.html`) também mostra
+um aviso destacado no topo em telas de até 900 px.
 
 ## Manutenção da réplica
 
