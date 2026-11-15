@@ -1,0 +1,13 @@
+# Mantém o repositório consistente entre Windows, macOS e Linux.
+* text=auto eol=lf
+
+# Binários: nada de conversão de fim de linha.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary

@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Direção B — Instrumento</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;background:#04090f}
+  body{font-family:"Inter",system-ui,sans-serif;color:#e8f2fb;-webkit-font-smoothing:antialiased}
+  x-dc{display:contents}
+  a{color:inherit;text-decoration:none}
+  .board{position:relative;width:1440px;height:1024px;overflow:hidden;isolation:isolate;background:
+    radial-gradient(800px 520px at 82% 4%,rgba(44,119,198,.2),transparent 65%),
+    radial-gradient(600px 500px at 12% 100%,rgba(85,206,255,.05),transparent 70%),
+    #04090f}
+  .dots{position:absolute;inset:0;z-index:0;background-image:radial-gradient(rgba(120,165,205,.16) 1px,transparent 1px);background-size:26px 26px;opacity:.5;
+    -webkit-mask-image:radial-gradient(90% 90% at 50% 30%,#000 10%,transparent 85%);mask-image:radial-gradient(90% 90% at 50% 30%,#000 10%,transparent 85%)}
+  .arc{position:absolute;right:-240px;top:-300px;width:900px;height:900px;border:1px solid rgba(85,206,255,.1);border-radius:50%;z-index:0}
+  .arc::after{content:"";position:absolute;inset:90px;border:1px dashed rgba(85,206,255,.08);border-radius:50%}
+
+  .rail{position:absolute;left:0;top:0;bottom:0;width:56px;border-right:1px solid rgba(85,206,255,.14);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px 0;z-index:4}
+  .rail .v{writing-mode:vertical-rl;transform:rotate(180deg);font-family:"JetBrains Mono";font-size:8px;letter-spacing:.3em;text-transform:uppercase;color:#5a748d}
+  .rail .v b{color:#cfe4f5;font-weight:500}
+  .rail .ticks{display:flex;flex-direction:column;gap:7px}
+  .rail .ticks i{width:1px;height:14px;background:rgba(85,206,255,.25)}
+  .rail .ticks i:nth-child(2){height:26px;background:#55ceff;box-shadow:0 0 8px rgba(85,206,255,.6)}
+
+  .main{position:absolute;left:56px;right:56px;top:0;bottom:0;z-index:2}
+  .inner{width:1240px;margin:0 auto}
+
+  header{height:76px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(85,206,255,.14)}
+  .crumb{display:flex;align-items:center;gap:12px}
+  .crumb img{width:30px;height:30px;border-radius:7px}
+  .crumb .mono{font-family:"JetBrains Mono";font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;color:#8fa8bf}
+  .crumb .mono b{color:#e8f2fb;font-weight:500}
+  .hdr-r{display:flex;align-items:center;gap:18px}
+  .clock{font-family:"JetBrains Mono";font-size:9px;letter-spacing:.1em;color:#7e97ae}
+  .clock b{color:#cfe4f5;font-weight:500}
+  .avail{display:inline-flex;align-items:center;gap:7px;font-family:"JetBrains Mono";font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:#9db8d2;padding:7px 10px;border:1px solid rgba(85,206,255,.2)}
+  .avail i{width:5px;height:5px;border-radius:50%;background:#7ee2a8;box-shadow:0 0 8px rgba(126,226,168,.8);animation:pulse 2.4s infinite}
+  @keyframes pulse{50%{opacity:.35}}
+  .cta{display:inline-flex;align-items:center;gap:8px;height:36px;padding:0 14px;background:#2c77c6;border:1px solid rgba(143,224,255,.3);color:#fff;font-size:11px;font-weight:600;letter-spacing:.02em}
+  .cta:hover{background:#3a89da}
+  .cta svg{width:12px;height:12px}
+
+  .hero{display:grid;grid-template-columns:minmax(0,1fr) 392px;gap:56px;padding-top:28px}
+  .kicker{display:flex;align-items:center;gap:10px;margin:0;font-family:"JetBrains Mono";font-size:9px;letter-spacing:.17em;text-transform:uppercase;color:#8fa8bf}
+  .kicker b{color:#55ceff;font-weight:500}
+  .kicker .rule{width:44px;height:1px;background:rgba(85,206,255,.35)}
+  h1{margin:12px 0 0;font-family:"Anton";font-size:122px;line-height:.83;font-weight:400;letter-spacing:.005em;text-transform:uppercase}
+  .line{display:block;overflow:hidden;padding-bottom:.04em}
+  .line>span{display:block;animation:cut .9s cubic-bezier(.16,1,.3,1) both}
+  .line:nth-child(2)>span{animation-delay:.08s}
+  .line:nth-child(3)>span{animation-delay:.16s}
+  @keyframes cut{from{transform:translateY(105%)}to{transform:none}}
+  .ghost{color:transparent;-webkit-text-stroke:1.4px rgba(85,206,255,.62)}
+  .solid{color:#55ceff}
+  .lede{display:grid;grid-template-columns:1fr 1fr;gap:26px;max-width:760px;margin-top:22px;font-size:12.5px;line-height:1.62;color:#9db4c9}
+  .lede strong{color:#e8f2fb;font-weight:500}
+  .sig{display:flex;align-items:center;gap:14px;margin-top:22px;padding-top:16px;border-top:1px solid rgba(85,206,255,.14);font-family:"JetBrains Mono";font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:#6f8cab}
+  .sig b{color:#e8f2fb;font-weight:500}
+  .sig .sep{width:3px;height:3px;border-radius:50%;background:#2c77c6}
+
+  .idcard{position:relative;margin-top:6px;height:500px;border:1px solid #1a344c;background:linear-gradient(170deg,rgba(10,26,42,.92),rgba(5,14,24,.96));padding:16px;display:flex;flex-direction:column}
+  .idcard::before,.idcard::after{content:"";position:absolute;width:9px;height:9px;border:1px solid rgba(143,224,255,.7)}
+  .idcard::before{top:-1px;left:-1px;border-right:0;border-bottom:0}
+  .idcard::after{bottom:-1px;right:-1px;border-left:0;border-top:0}
+  .id-top{display:flex;justify-content:space-between;font-family:"JetBrains Mono";font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#7e97ae}
+  .id-top b{color:#55ceff;font-weight:500}
+  .id-photo{position:relative;height:150px;margin-top:10px;border:1px solid #1a344c;overflow:hidden;background:radial-gradient(70% 80% at 50% 30%,rgba(44,119,198,.3),transparent 72%),#081827}
+  .id-photo img{position:absolute;left:50%;bottom:0;width:196px;height:150px;object-fit:cover;object-position:top center;transform:translateX(-50%)}
+  .id-photo::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(4,9,15,.35) 3px 4px)}
+  .id-photo span{position:absolute;right:7px;bottom:6px;font-family:"JetBrains Mono";font-size:7px;letter-spacing:.1em;color:#8fe0ff}
+  .rows{margin-top:12px;border-top:1px solid #1a344c}
+  .idrow{display:grid;grid-template-columns:78px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #13293c}
+  .idrow dt{margin:0;font-family:"JetBrains Mono";font-size:7.5px;letter-spacing:.13em;text-transform:uppercase;color:#6f8cab}
+  .idrow dd{margin:0;font-size:10.5px;line-height:1.35;color:#cfe0ef}
+  .idrow dd b{color:#55ceff;font-weight:500}
+  .chart{margin-top:auto;padding-top:12px;border-top:1px solid #1a344c}
+  .chart p{display:flex;justify-content:space-between;margin:0 0 8px;font-family:"JetBrains Mono";font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:#6f8cab}
+  .bars{display:flex;align-items:flex-end;gap:5px;height:52px}
+  .bars i{flex:1;background:linear-gradient(180deg,#55ceff,rgba(44,119,198,.35));transform-origin:bottom;animation:grow 1.2s cubic-bezier(.16,1,.3,1) both}
+  .bars i:nth-child(1){height:38%;animation-delay:.2s}
+  .bars i:nth-child(2){height:62%;animation-delay:.28s}
+  .bars i:nth-child(3){height:48%;animation-delay:.36s}
+  .bars i:nth-child(4){height:82%;animation-delay:.44s;background:linear-gradient(180deg,#8fe0ff,#2c77c6)}
+  .bars i:nth-child(5){height:56%;animation-delay:.52s}
+  .bars i:nth-child(6){height:70%;animation-delay:.6s}
+  @keyframes grow{from{transform:scaleY(.08);opacity:0}to{transform:none;opacity:1}}
+
+  .index{margin-top:38px}
+  .index-head{display:flex;align-items:baseline;justify-content:space-between;padding-bottom:9px;border-bottom:1px solid rgba(85,206,255,.28)}
+  .index-head p{margin:0;font-family:"JetBrains Mono";font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;color:#8fa8bf}
+  .index-head p b{color:#55ceff;font-weight:500}
+  .index-head span{font-family:"JetBrains Mono";font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#5a748d}
+  .index-body{display:grid;grid-template-columns:1fr 392px;gap:48px}
+  .list{margin:0;padding:0;list-style:none}
+  .prow{position:relative;display:grid;grid-template-columns:34px 1fr 150px 54px 18px;align-items:center;gap:12px;height:42px;border-bottom:1px solid #13293c;transition:color .2s}
+  .prow::before{content:"";position:absolute;left:-14px;right:-14px;top:0;bottom:0;background:linear-gradient(90deg,rgba(85,206,255,.09),rgba(85,206,255,0));opacity:0;transition:opacity .25s;pointer-events:none}
+  .prow:hover::before,.prow.on::before{opacity:1}
+  .prow .n{font-family:"JetBrains Mono";font-size:8px;letter-spacing:.1em;color:#5a748d}
+  .prow .t{font-size:13px;font-weight:500;color:#cfe0ef;transition:transform .3s cubic-bezier(.16,1,.3,1),color .2s}
+  .prow:hover .t{transform:translateX(6px);color:#fff}
+  .prow .c{font-family:"JetBrains Mono";font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:#7e97ae}
+  .prow .y{font-family:"JetBrains Mono";font-size:8px;color:#5a748d;text-align:right}
+  .prow svg{width:12px;height:12px;color:#55ceff;opacity:0;transform:translateX(-4px);transition:.2s}
+  .prow:hover svg,.prow.on svg{opacity:1;transform:none}
+
+  .preview{position:relative;height:236px;border:1px solid #1a344c;overflow:hidden;background:#050e17}
+  .pv{position:absolute;inset:0;opacity:0;transition:opacity .35s ease}
+  .pv.on{opacity:1}
+  .pv img{width:100%;height:170px;object-fit:cover;object-position:top center;filter:saturate(.9) brightness(.85)}
+  .pv .cap{position:absolute;left:0;right:0;bottom:0;height:66px;padding:10px 13px;background:#071320;border-top:1px solid #1a344c;display:flex;justify-content:space-between;align-items:flex-start}
+  .pv .cap b{display:block;font-family:"JetBrains Mono";font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:#55ceff}
+  .pv .cap em{display:block;margin-top:4px;font-style:normal;font-size:10px;color:#8fa8bf}
+  .pv .cap span{font-family:"JetBrains Mono";font-size:8px;color:#5a748d}
+  .art{height:170px;position:relative;overflow:hidden;background:radial-gradient(80% 90% at 30% 0%,rgba(44,119,198,.35),transparent 70%),#071320}
+  .art .b{position:absolute;bottom:18px;width:22px;background:linear-gradient(180deg,#55ceff,rgba(44,119,198,.25))}
+  .art .l{position:absolute;left:20px;right:20px;top:50%;height:1px;background:rgba(85,206,255,.25)}
+  .art .ring{position:absolute;right:26px;top:24px;width:90px;height:90px;border:1px solid rgba(85,206,255,.3);border-radius:50%}
+  .art .ring::after{content:"";position:absolute;inset:18px;border:1px dashed rgba(85,206,255,.25);border-radius:50%}
+  .art .glyph{position:absolute;inset:0;display:grid;place-items:center;color:#8fe0ff;opacity:.9}
+  .art .glyph svg{width:74px;height:74px}
+
+  .foot{position:absolute;left:56px;right:56px;bottom:14px;display:flex;justify-content:space-between;font-family:"JetBrains Mono";font-size:7.5px;letter-spacing:.14em;text-transform:uppercase;color:#4e687f;z-index:3}
+</style>
+</helmet>
+
+<div class="board">
+  <div class="dots"></div>
+  <div class="arc"></div>
+
+  <aside class="rail">
+    <span class="v"><b>GUTOEXPLORER</b> · 2026</span>
+    <div class="ticks"><i></i><i></i><i></i><i></i></div>
+    <span class="v">23°34′ S · 46°51′ W</span>
+  </aside>
+
+  <div class="main">
+    <div class="inner">
+      <header>
+        <div class="crumb">
+          <img src="/_blob/b048c957e37b154ed0258b11ce0149b6" alt="">
+          <span class="mono"><b>Portfólio</b> / profissional de dados</span>
+        </div>
+        <div class="hdr-r">
+          <span class="clock"><b id="clock">23:14</b> BRT</span>
+          <span class="avail"><i></i>Disponível</span>
+          <a class="cta" href="#" data-magnetic>Falar comigo
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg>
+          </a>
+        </div>
+      </header>
+
+      <section class="hero">
+        <div>
+          <p class="kicker"><b>01</b> Análise de dados <span class="rule"></span> Processos <span class="rule"></span> Automação</p>
+          <h1>
+            <span class="line"><span>Dados</span></span>
+            <span class="line"><span class="ghost">com</span></span>
+            <span class="line"><span class="solid">contexto.</span></span>
+          </h1>
+          <div class="lede">
+            <p style="margin:0">Sou <strong>Gustavo Pinheiro</strong>, profissional de dados com perfil analítico. Começo antes do número: entendo o processo, ouço quem executa a rotina e identifico onde a informação se perde.</p>
+            <p style="margin:0">Uso Python, Power BI e automação para reduzir esforço operacional e devolver tempo ao time. Tecnologia como meio; decisão com critério como fim.</p>
+          </div>
+          <div class="sig"><b>Gustavo Pinheiro</b><span class="sep"></span>Cajamar, SP<span class="sep"></span>05 projetos · 12 temas</div>
+        </div>
+
+        <aside class="idcard">
+          <div class="id-top"><span>Ficha / <b>001</b></span><span>Portfólio 2026</span></div>
+          <div class="id-photo">
+            <img src="/_blob/a4b55efd9b03599a69edfd4fdbaf47eb" alt="Retrato estilizado de Gustavo">
+            <span>ID · GUTO</span>
+          </div>
+          <dl class="rows">
+            <div class="idrow"><dt>Base</dt><dd>Cajamar, SP · Brasil</dd></div>
+            <div class="idrow"><dt>Foco</dt><dd>Análise de dados e melhoria de processos</dd></div>
+            <div class="idrow"><dt>Stack</dt><dd>Python · Power BI · <b>Excel</b></dd></div>
+            <div class="idrow"><dt>Status</dt><dd>Aberto a conversas</dd></div>
+          </dl>
+          <div class="chart">
+            <p><span>Indicadores / logística</span><span>2024—2026</span></p>
+            <div class="bars"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="index">
+        <div class="index-head"><p><b>02</b> Índice de projetos</p><span>Passe o mouse para abrir a prévia</span></div>
+        <div class="index-body">
+          <ul class="list" id="list">
+            <li class="prow on" data-i="0"><span class="n">01</span><span class="t">PagFlow</span><span class="c">Automação · destaque</span><span class="y">2026</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></li>
+            <li class="prow" data-i="1"><span class="n">02</span><span class="t">Gestão de KPI</span><span class="c">Dados · logística</span><span class="y">2026</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></li>
+            <li class="prow" data-i="2"><span class="n">03</span><span class="t">Power Query na equipe</span><span class="c">Leitura · Medium</span><span class="y">2026</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></li>
+            <li class="prow" data-i="3"><span class="n">04</span><span class="t">Ética em IA generativa</span><span class="c">Leitura · Medium</span><span class="y">2026</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></li>
+            <li class="prow" data-i="4"><span class="n">05</span><span class="t">Rotina financeira</span><span class="c">Processos</span><span class="y">2024</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13M12 6l6 6-6 6"/></svg></li>
+          </ul>
+
+          <div class="preview" id="preview">
+            <div class="pv on" data-i="0">
+              <img src="/_blob/8bdc82e386408329475ec344619790ab" alt="Tela do PagFlow">
+              <div class="cap"><div><b>01 / PagFlow</b><em>Faturas SAP em um Excel · 12 temas</em></div><span>2026</span></div>
+            </div>
+            <div class="pv" data-i="1">
+              <div class="art">
+                <div class="b" style="left:26px;height:46%"></div><div class="b" style="left:54px;height:68%"></div><div class="b" style="left:82px;height:38%"></div><div class="b" style="left:110px;height:84%"></div><div class="b" style="left:138px;height:58%"></div>
+                <div class="l"></div><div class="ring"></div>
+              </div>
+              <div class="cap"><div><b>02 / Gestão de KPI</b><em>Investigar a meta antes de concluir</em></div><span>2026</span></div>
+            </div>
+            <div class="pv" data-i="2">
+              <div class="art"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 7h7l3 5-3 5H4M20 7h-5M20 17h-5"/></svg></div><div class="ring"></div></div>
+              <div class="cap"><div><b>03 / Power Query</b><em>Automação que a equipe adotou</em></div><span>Medium</span></div>
+            </div>
+            <div class="pv" data-i="3">
+              <div class="art"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><circle cx="12" cy="12" r="8"/><path d="M12 4v16M4 12h16"/></svg></div><div class="ring"></div></div>
+              <div class="cap"><div><b>04 / Ética em IA</b><em>Documentação, viés e rastreabilidade</em></div><span>Medium</span></div>
+            </div>
+            <div class="pv" data-i="4">
+              <div class="art"><div class="glyph"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2"><path d="M4 8h16M4 12h16M4 16h10"/><circle cx="19" cy="16" r="2"/></svg></div><div class="ring"></div></div>
+              <div class="cap"><div><b>05 / Rotina financeira</b><em>Entender a rotina, reduzir o manual</em></div><span>2024</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="foot"><span>gutoexplorer — portfólio</span><span>Direção B · instrumento</span><span>02 / 03</span></div>
+</div>
+</x-dc>
+
+<script>
+(function () {
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  var clock = document.getElementById('clock');
+  function tick() {
+    var now = new Date();
+    clock.textContent = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
+  }
+  tick(); setInterval(tick, 30000);
+
+  var rows = [].slice.call(document.querySelectorAll('.prow'));
+  var previews = [].slice.call(document.querySelectorAll('.pv'));
+  rows.forEach(function (row) {
+    row.addEventListener('pointerenter', function () {
+      var i = +row.getAttribute('data-i');
+      rows.forEach(function (r) { r.classList.toggle('on', r === row); });
+      previews.forEach(function (p) { p.classList.toggle('on', +p.getAttribute('data-i') === i); });
+    });
+  });
+
+  document.querySelectorAll('[data-magnetic]').forEach(function (el) {
+    el.addEventListener('pointermove', function (e) {
+      if (reduced) return;
+      var r = el.getBoundingClientRect();
+      el.style.transform = 'translate(' + Math.max(-5, Math.min(5, (e.clientX - r.left - r.width / 2) * 0.12)) + 'px,' + Math.max(-5, Math.min(5, (e.clientY - r.top - r.height / 2) * 0.16)) + 'px)';
+    });
+    el.addEventListener('pointerleave', function () { el.style.transform = ''; });
+  });
+})();
+</script>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1024}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

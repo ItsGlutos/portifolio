@@ -1,0 +1,177 @@
+/* ==========================================================================
+   Céu Estrelado — tokens
+   Fonte da verdade: fundo-estrelado-escuro.md (v1.0) + marca gutoexplorer.
+   Um único azul de ação (#2c77c6) e um azul celeste de marca (#55ceff).
+   Regra: celeste é sinal/texto/contorno; preenchimento de ação usa o azul
+   profundo, porque branco sobre celeste não passa em contraste.
+   Tipografia: Space Grotesk (títulos), Segoe UI (texto), JetBrains Mono
+   (rótulos). As fontes moram em assets/fonts — sem CDN, o site segue offline.
+   ========================================================================== */
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../fonts/SpaceGrotesk-400.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../fonts/SpaceGrotesk-500.ttf") format("truetype");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Space Grotesk";
+  src: url("../fonts/SpaceGrotesk-700.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono-400.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("../fonts/JetBrainsMono-700.ttf") format("truetype");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  color-scheme: dark;
+
+  /* Fundo e atmosfera ------------------------------------------------------ */
+  --sky-top: #091522;
+  --sky-bottom: #11263e;
+  --sky-glow: 45 125 210;      /* #2d7dd2 em canais, para usar com alfa */
+  --glow-strength: 0.125;
+  --void: #071220;
+
+  /* Superfícies ------------------------------------------------------------ */
+  --surface: rgba(17, 34, 54, 0.88);
+  --surface-solid: #112236;
+  --surface-alt: #162b44;
+  --surface-raised: rgba(22, 43, 68, 0.94);
+  --surface-deep: rgba(10, 24, 40, 0.72);
+  --border: #1b3a5c;
+  --border-strong: #2a567f;
+  --border-soft: rgba(27, 58, 92, 0.56);
+  --field: #0a1828;
+  --field-focus: #0c1e33;
+
+  /* Texto ------------------------------------------------------------------ */
+  --text: #e8f0fe;
+  --text-secondary: #94b4d4;
+  --text-muted: #6f8cab;
+  --placeholder: #7694b4;
+
+  /* Destaque de ação ------------------------------------------------------- */
+  --accent: #2c77c6;
+  --accent-hover: #3a89da;
+  --accent-pressed: #22609c;
+  --on-accent: #ffffff;
+  --accent-soft: #16324f;
+  --accent-soft-text: #9cc7ff;
+
+  /* Azul celeste (marca, sinal, estrelas) ---------------------------------- */
+  --celeste: #55ceff;
+  --celeste-strong: #8fe0ff;
+  --celeste-dim: #5b8fc9;
+  --celeste-deep: #1b4f78;
+  --celeste-soft: rgba(85, 206, 255, 0.1);
+  --celeste-line: rgba(85, 206, 255, 0.28);
+  --celeste-glow: rgba(85, 206, 255, 0.22);
+
+  /* Estados semânticos ----------------------------------------------------- */
+  --success: #7ee2a8;
+  --success-bg: #12331f;
+  --danger: #ff9e9e;
+  --danger-bg: #3a1618;
+  --warning: #ffd479;
+  --warning-bg: #3a2e12;
+  --info: #b7cfea;
+  --info-bg: #14273d;
+
+  /* Tipografia ------------------------------------------------------------- */
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", "Inter", -apple-system,
+    "SF Pro Text", "Roboto", system-ui, sans-serif;
+  --font-display: "Space Grotesk", "Segoe UI Variable Display", "Segoe UI",
+    "Inter", -apple-system, "SF Pro Display", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Cascadia Code", "SFMono-Regular", Consolas,
+    "Liberation Mono", monospace;
+
+  --fs-micro: 0.6875rem;   /* 11px */
+  --fs-xs: 0.75rem;        /* 12px */
+  --fs-sm: 0.8125rem;      /* 13px */
+  --fs-body: 0.9375rem;    /* 15px */
+  --fs-lead: 1.0625rem;    /* 17px */
+  --fs-h3: 1.25rem;        /* 20px */
+  --fs-h2: clamp(1.8rem, 3.4vw, 2.5rem);
+  --fs-h1: clamp(2.65rem, 6.3vw, 4.75rem);
+  --fs-quote: clamp(1.375rem, 2.6vw, 1.875rem);
+
+  --tracking-micro: 0.14em;
+  --tracking-tight: -0.015em;
+  --tracking-display: -0.045em;
+
+  --lh-display: 0.99;
+  --lh-heading: 1.12;
+  --lh-body: 1.65;
+  --lh-tight: 1.35;
+
+  /* Espaço (base 2px, múltiplos pares) ------------------------------------- */
+  --space-1: 2px;
+  --space-2: 4px;
+  --space-3: 6px;
+  --space-4: 8px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-8: 24px;
+  --space-9: 32px;
+  --space-10: 40px;
+  --space-11: 48px;
+  --space-12: 64px;
+  --space-13: 80px;
+  --space-14: 96px;
+  --space-15: 128px;
+
+  /* Raios ------------------------------------------------------------------ */
+  --r-badge: 6px;
+  --r-field: 10px;
+  --r-card: 12px;
+  --r-panel: 18px;
+  --r-xl: 24px;
+  --r-2xl: 28px;
+  --r-pill: 999px;
+
+  /* Elevação (luz, não sombra) --------------------------------------------- */
+  --glow-accent: 0 0 26px rgba(44, 119, 198, 0.37);
+  --glow-celeste: 0 0 40px rgba(85, 206, 255, 0.16);
+  --shadow-float: 0 28px 60px -36px rgba(2, 8, 18, 0.9);
+  --shadow-hard: 0 24px 48px -28px rgba(3, 10, 20, 0.95);
+  --inset-sheen: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+
+  /* Movimento -------------------------------------------------------------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --dur-fast: 150ms;
+  --dur-mid: 220ms;
+  --dur-slow: 600ms;
+
+  /* Layout ----------------------------------------------------------------- */
+  --content-max: 1280px;
+  --gutter: clamp(20px, 4vw, 40px);
+  --header-h: 76px;
+}

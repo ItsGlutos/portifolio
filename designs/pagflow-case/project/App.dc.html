@@ -1,0 +1,1181 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PagFlow — app interativo</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/guto-design-system/tokens.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Outfit:wght@400;600;800&family=Space+Grotesk:wght@400;500;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Anton&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #040b13;
+    color: var(--text, #e8f0fe);
+    font-family: var(--font-sans, "Segoe UI", system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+  }
+  .board { width: 1280px; height: 1064px; background: #040b13; overflow: hidden; }
+
+  /* ── app window ─────────────────────────────────────────────────────── */
+  .app {
+    position: relative;
+    width: 1280px;
+    height: 960px;
+    overflow: hidden;
+    color: var(--text);
+    font-family: var(--ui);
+    background: #091522;
+  }
+  .sky { position: absolute; inset: 0; z-index: 0; overflow: hidden; }
+  .shell {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px 20px 10px;
+  }
+  .starfield {
+    position: absolute; inset: 0; display: none;
+    background-image:
+      radial-gradient(1.6px 1.6px at 6% 12%, rgba(143, 224, 255, 0.9), transparent 60%),
+      radial-gradient(1.2px 1.2px at 14% 38%, rgba(156, 199, 255, 0.6), transparent 60%),
+      radial-gradient(1.8px 1.8px at 22% 8%, rgba(156, 199, 255, 0.85), transparent 60%),
+      radial-gradient(1.2px 1.2px at 31% 26%, rgba(143, 224, 255, 0.5), transparent 60%),
+      radial-gradient(1.4px 1.4px at 39% 58%, rgba(156, 199, 255, 0.55), transparent 60%),
+      radial-gradient(1.6px 1.6px at 47% 17%, rgba(156, 199, 255, 0.8), transparent 60%),
+      radial-gradient(1.2px 1.2px at 56% 44%, rgba(156, 199, 255, 0.4), transparent 60%),
+      radial-gradient(1.7px 1.7px at 64% 9%, rgba(143, 224, 255, 0.75), transparent 60%),
+      radial-gradient(1.2px 1.2px at 72% 32%, rgba(156, 199, 255, 0.5), transparent 60%),
+      radial-gradient(1.5px 1.5px at 79% 61%, rgba(156, 199, 255, 0.55), transparent 60%),
+      radial-gradient(1.3px 1.3px at 86% 21%, rgba(156, 199, 255, 0.65), transparent 60%),
+      radial-gradient(1.9px 1.9px at 93% 47%, rgba(143, 224, 255, 0.8), transparent 60%),
+      radial-gradient(1.2px 1.2px at 9% 72%, rgba(156, 199, 255, 0.45), transparent 60%),
+      radial-gradient(1.3px 1.3px at 28% 84%, rgba(156, 199, 255, 0.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 52% 78%, rgba(156, 199, 255, 0.5), transparent 60%),
+      radial-gradient(1.2px 1.2px at 68% 91%, rgba(156, 199, 255, 0.35), transparent 60%),
+      radial-gradient(1.4px 1.4px at 88% 82%, rgba(156, 199, 255, 0.5), transparent 60%),
+      radial-gradient(1.2px 1.2px at 96% 68%, rgba(156, 199, 255, 0.4), transparent 60%);
+    animation: twinkle 9s ease-in-out infinite;
+  }
+  @keyframes twinkle { 0%, 100% { opacity: 0.55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .starfield { animation: none; } }
+
+  /* ── topbar ─────────────────────────────────────────────────────────── */
+  .topbar { display: flex; align-items: center; justify-content: space-between; height: 24px; margin-bottom: 8px; }
+  .meta {
+    font-family: var(--meta-font);
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: var(--meta-track);
+    text-transform: var(--meta-transform);
+    color: var(--muted);
+  }
+  .top-actions { display: flex; align-items: center; gap: 8px; }
+  .icon-btn {
+    display: grid; place-items: center;
+    width: 24px; height: 24px;
+    padding: 0; border: 0; background: transparent;
+    color: var(--muted); cursor: pointer;
+  }
+  .icon-btn svg { width: 12px; height: 12px; }
+  .toggle {
+    position: relative;
+    display: flex; align-items: center; justify-content: space-between;
+    width: 58px; height: 26px;
+    padding: 0 7px;
+    border: 1px solid var(--border);
+    border-radius: 13px;
+    background: var(--surface-alt);
+    cursor: pointer;
+  }
+  .toggle span { position: relative; z-index: 2; font-size: 10px; line-height: 1; color: var(--muted); }
+  .toggle .moon { color: var(--primary-text); }
+  .toggle .sun { color: var(--muted); }
+  .t-light .toggle .moon,
+  .t-graduation .toggle .moon,
+  .t-lana .toggle .moon,
+  .t-wolverine .toggle .moon,
+  .t-flowerboy .toggle .moon,
+  .t-natal .toggle .moon,
+  .t-leila .toggle .moon { color: var(--muted); }
+  .t-light .toggle .sun,
+  .t-graduation .toggle .sun,
+  .t-lana .toggle .sun,
+  .t-wolverine .toggle .sun,
+  .t-flowerboy .toggle .sun,
+  .t-natal .toggle .sun,
+  .t-leila .toggle .sun { color: var(--primary-text); }
+  .knob {
+    position: absolute; top: 1px; left: 1px; z-index: 1;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  }
+  .t-light .knob, .t-graduation .knob, .t-lana .knob, .t-wolverine .knob,
+  .t-flowerboy .knob, .t-natal .knob, .t-leila .knob { left: auto; right: 1px; }
+
+  /* ── brand card ─────────────────────────────────────────────────────── */
+  .brand-card {
+    position: relative;
+    display: flex; align-items: center; gap: 11px;
+    height: 52px;
+    padding: 0 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--card-radius, 12px);
+    background: var(--card-bg);
+    box-shadow: var(--card-shadow);
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .brand-card::before {
+    content: "";
+    position: absolute; top: 0; left: 0; right: 0;
+    height: var(--card-edge-h, 0);
+    background: var(--card-edge, transparent);
+    opacity: var(--card-edge-a, 1);
+  }
+  .logo { display: grid; place-items: center; width: 30px; height: 30px; flex: none; }
+  .logo img {
+    width: 30px; height: 30px; border-radius: 7px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: block;
+  }
+  /* o emoji é normalizado pela tinta do glifo no app (90% do miolo do tile),
+     por isso os corpos abaixo são maiores que a caixa de 30px sugere */
+  .logo-emoji { font-family: "Segoe UI Emoji", "Apple Color Emoji", sans-serif; font-size: 29px; line-height: 1; }
+  .brand-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .brand-title {
+    font-family: var(--display);
+    font-size: var(--brand-size);
+    font-weight: 600;
+    letter-spacing: var(--brand-track);
+    text-transform: var(--brand-transform);
+    color: var(--brand-color, var(--text));
+    line-height: 1.15;
+    white-space: nowrap;
+    padding-top: var(--brand-dy, 0);
+  }
+  .brand-title .suffix {
+    color: var(--suffix-color);
+    font-style: var(--suffix-style);
+    text-transform: none;
+    font-size: var(--suffix-size, inherit);
+    background: var(--suffix-bg, transparent);
+    padding: var(--suffix-pad, 0);
+    margin-left: 0.24em;
+  }
+  .brand-title .suffix:empty { display: none; }
+  .brand-sub { font-family: var(--ui); font-size: 9px; color: var(--text2); line-height: 1.2; }
+  .badge {
+    margin-left: auto;
+    padding: 3px 9px;
+    border: 1px solid var(--badge-border);
+    border-radius: 6px;
+    background: var(--badge-bg);
+    color: var(--badge-fg);
+    font-family: var(--badge-font, var(--ui));
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: var(--badge-track);
+    text-transform: var(--badge-transform);
+    line-height: 1.2;
+    white-space: nowrap;
+  }
+
+  /* ── view switch ────────────────────────────────────────────────────── */
+  .viewswitch {
+    align-self: center;
+    display: flex;
+    width: 268px; height: 30px;
+    margin-bottom: 10px;
+    padding: 3px;
+    border: 1px solid var(--vs-border);
+    border-radius: 15px;
+    background: var(--vs-bg);
+  }
+  .vt {
+    flex: 1;
+    height: 24px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--ui);
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .vt:hover { color: var(--text); }
+  .vt.is-active {
+    border-color: var(--view-border);
+    background: var(--view-bg);
+    color: var(--view-fg);
+    font-weight: 600;
+  }
+
+  /* ── page + form ────────────────────────────────────────────────────── */
+  .page { display: flex; flex: 1; min-height: 0; flex-direction: column; }
+  .is-hidden { display: none !important; }
+  .section { display: flex; align-items: center; gap: 8px; height: 20px; margin-bottom: 5px; }
+  .chip {
+    display: grid; place-items: center;
+    width: 20px; height: 20px;
+    border-radius: var(--chip-radius, 10px);
+    background: linear-gradient(135deg, var(--chip-from), var(--chip-to));
+    color: var(--chip-fg);
+    font-family: var(--ui);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .st {
+    font-family: var(--section-font);
+    font-size: var(--section-size);
+    font-weight: 600;
+    letter-spacing: var(--section-track);
+    text-transform: var(--section-transform);
+    color: var(--text);
+  }
+  .group { margin-bottom: 14px; }
+  .field {
+    width: 100%;
+    height: 32px;
+    padding: 0 11px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius, 10px);
+    background: var(--field);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 11px;
+    outline: none;
+  }
+  .field::placeholder { color: var(--placeholder); opacity: 1; }
+  .field:hover { border-color: var(--field-hover, var(--border-strong)); }
+  .field:focus { border-color: var(--accent); background: var(--field-focus); }
+  .row { display: flex; gap: 8px; }
+  .row .field { flex: 1; }
+  .icon-btn--field {
+    width: 36px; height: 32px; flex: none;
+    border: 1px solid var(--pick-border, var(--field-border));
+    border-radius: 10px;
+    background: var(--pick-bg, var(--field));
+    color: var(--pick-fg, var(--text2));
+    cursor: pointer;
+  }
+  .icon-btn--field:hover { border-color: var(--accent); color: var(--accent); }
+  .icon-btn--field svg { width: 14px; height: 13px; }
+
+  .seg {
+    display: flex;
+    height: 32px;
+    padding: 2px;
+    border: 1px solid var(--field-border);
+    border-radius: 9px;
+    background: var(--field);
+  }
+  .sg {
+    flex: 1;
+    height: 26px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 7px;
+    background: transparent;
+    color: var(--text2);
+    font-family: var(--ui);
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+  }
+  .sg:hover { color: var(--text); }
+  .sg.is-active {
+    border-color: var(--seg-border);
+    background: linear-gradient(180deg, var(--seg-from), var(--seg-to));
+    color: var(--seg-fg);
+    font-weight: 600;
+  }
+
+  .select {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%; height: 32px;
+    padding: 0 11px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius, 10px);
+    background: var(--field);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 11px;
+    cursor: pointer;
+  }
+  .select svg { width: 9px; height: 9px; color: var(--text2); }
+
+  .spacer { flex: 1; min-height: 8px; }
+  .divider {
+    height: 1px; margin-bottom: 12px;
+    background: linear-gradient(90deg, transparent, var(--border) 18%, var(--border) 82%, transparent);
+  }
+  .actions { display: flex; align-items: center; justify-content: space-between; }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    height: 36px;
+    border-radius: 10px;
+    font-family: var(--button-font);
+    font-size: var(--button-size);
+    letter-spacing: var(--button-track);
+    text-transform: var(--button-transform);
+    cursor: pointer;
+  }
+  .btn--ghost {
+    width: 130px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text2);
+    font-weight: 500;
+  }
+  .btn--ghost:hover { border-color: var(--accent); color: var(--text); }
+  .btn--primary {
+    width: 152px;
+    border: 0;
+    background: linear-gradient(180deg, var(--primary-from), var(--primary-to));
+    color: var(--primary-text);
+    font-weight: 600;
+    box-shadow: var(--btn-glow);
+  }
+  .btn--primary:hover { background: linear-gradient(180deg, var(--primary-hover-from), var(--primary-hover-to)); }
+  .btn--primary svg { width: 10px; height: 11px; }
+
+  /* ── envio page ─────────────────────────────────────────────────────── */
+  .hint { margin: -3px 0 12px 0; font-size: 10px; line-height: 1.5; color: var(--text2); }
+  .msg-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
+  .sub-label {
+    font-family: var(--ui);
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .mini {
+    height: 26px;
+    padding: 0 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text2);
+    font-family: var(--ui);
+    font-size: 10px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .mini:hover { border-color: var(--accent); color: var(--text); }
+  .mini-actions { display: flex; gap: 8px; }
+  .body-field {
+    flex: 1;
+    min-height: 120px;
+    width: 100%;
+    padding: 10px 11px;
+    border: 1px solid var(--field-border);
+    border-radius: var(--field-radius, 10px);
+    background: var(--field);
+    color: var(--text);
+    font-family: var(--ui);
+    font-size: 11px;
+    line-height: 1.7;
+    resize: none;
+    outline: none;
+  }
+  .body-field:focus { border-color: var(--accent); }
+  .envio-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 12px; }
+  .envio-foot .hint { margin: 0; }
+  .btn--mail { width: 160px; }
+  .btn--mail svg { width: 13px; height: 12px; }
+
+  /* ── status ─────────────────────────────────────────────────────────── */
+  .status {
+    display: flex; align-items: center;
+    height: 32px;
+    margin-top: 8px;
+    padding: 0 14px;
+    border: 1px solid var(--status-border);
+    border-radius: 10px;
+    background: var(--status-bg);
+    color: var(--status-fg);
+    font-family: var(--status-font);
+    font-size: var(--status-size);
+    letter-spacing: var(--status-track);
+    text-transform: var(--status-transform);
+  }
+  .dot {
+    width: 11px; height: 11px; margin-right: 7px;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--status-dot) 0 3px, rgba(255, 255, 255, 0.06) 3.4px 6px, transparent 6px);
+  }
+
+  /* ── temas: tokens ──────────────────────────────────────────────────── */
+  .t-dark {
+    --text:#E8F0FE; --text2:#94B4D4; --muted:#6F8CAB;
+    --card-bg:rgba(17,34,54,0.88); --card-shadow:none;
+    --border:#1B3A5C; --border-strong:#2A567F;
+    --field:#0A1828; --field-focus:#0C1E33; --field-border:#1B3A5C; --placeholder:#7694B4;
+    --accent:#2C77C6; --accent-hover:#3A89DA; --accent-soft:#16324F; --soft-text:#9CC7FF;
+    --primary-from:#2C77C6; --primary-to:#23629F; --primary-text:#FFFFFF;
+    --primary-hover-from:#3585D8; --primary-hover-to:#2A6FBA;
+    --btn-glow:0 0 26px rgba(44,119,198,0.37);
+    --chip-from:#2C77C6; --chip-to:#2C77C6; --chip-fg:#FFFFFF;
+    --badge-bg:#16324F; --badge-fg:#9CC7FF; --badge-border:transparent;
+    --status-bg:rgba(22,43,68,0.74); --status-border:#1B3A5C; --status-fg:#94B4D4; --status-dot:#2C77C6;
+    --seg-from:#2C77C6; --seg-to:#23629F; --seg-fg:#FFFFFF; --seg-border:#2C77C6;
+    --view-bg:#16324F; --view-border:rgba(44,119,198,0.55); --view-fg:#9CC7FF;
+    --vs-bg:rgba(10,24,40,0.53); --vs-border:rgba(27,58,92,0.59);
+    --card-edge:transparent; --card-edge-h:0px;
+    --display:"Segoe UI Variable Display","Segoe UI",sans-serif;
+    --ui:"Segoe UI Variable Text","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:16px; --brand-track:0; --brand-transform:none;
+    --section-size:11px; --section-track:0; --section-transform:none; --section-font:var(--ui);
+    --button-size:12px; --button-track:0; --button-transform:none; --button-font:var(--ui);
+    --status-size:11px; --status-track:0; --status-transform:none; --status-font:var(--ui);
+    --meta-track:1.1px; --meta-transform:uppercase; --meta-font:var(--ui);
+    --badge-track:0.36px; --badge-transform:none;
+    --suffix-color:var(--accent); --suffix-style:normal;
+    background: radial-gradient(90vmax 90vmax at 84% -7%, rgba(45,125,210,0.32), transparent 70%), linear-gradient(180deg,#091522,#11263E);
+  }
+  .t-dark .starfield { display: block; }
+
+  .t-light {
+    --text:#0B2540; --text2:#4B6A87; --muted:#6F8CA6;
+    --card-bg:rgba(255,255,255,0.96); --card-shadow:0 12px 26px -20px rgba(11,37,64,0.45);
+    --border:#D9E8F6; --border-strong:#BED8EC;
+    --field:#FFFFFF; --field-focus:#FFFFFF; --field-border:#D5E5F5; --placeholder:#8AA6BF;
+    --accent:#0EA5E9; --accent-hover:#38BDF8; --accent-soft:#E0F2FE; --soft-text:#0369A1;
+    --primary-from:#38BDF8; --primary-to:#0EA5E9; --primary-text:#062338;
+    --primary-hover-from:#4EC5FA; --primary-hover-to:#22A9E8;
+    --btn-glow:0 12px 24px -14px rgba(14,165,233,0.7);
+    --chip-from:#0EA5E9; --chip-to:#0284C7; --chip-fg:#FFFFFF;
+    --badge-bg:#E0F2FE; --badge-fg:#0369A1; --badge-border:transparent;
+    --status-bg:rgba(255,255,255,0.9); --status-border:#D9E8F6; --status-fg:#4B6A87; --status-dot:#0EA5E9;
+    --seg-from:#38BDF8; --seg-to:#0EA5E9; --seg-fg:#062338; --seg-border:#0EA5E9;
+    --view-bg:#E0F2FE; --view-border:#7DD3FC; --view-fg:#0369A1;
+    --vs-bg:rgba(255,255,255,0.55); --vs-border:rgba(213,229,245,0.9);
+    --card-edge:transparent; --card-edge-h:0px;
+    --display:"Segoe UI Variable Display","Segoe UI",sans-serif;
+    --ui:"Segoe UI Variable Text","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:16px; --brand-track:0; --brand-transform:none;
+    --section-size:11px; --section-track:0; --section-transform:none; --section-font:var(--ui);
+    --button-size:12px; --button-track:0; --button-transform:none; --button-font:var(--ui);
+    --status-size:11px; --status-track:0; --status-transform:none; --status-font:var(--ui);
+    --meta-track:1.1px; --meta-transform:uppercase; --meta-font:var(--ui);
+    --badge-track:0.36px; --badge-transform:none;
+    --suffix-color:var(--accent); --suffix-style:normal;
+    background: radial-gradient(90vmax 90vmax at 84% -6%, rgba(255,255,255,0.65), transparent 70%), linear-gradient(180deg,#E7F2FD,#FBFDFF);
+  }
+
+  .t-graduation {
+    --text:#1C1033; --text2:#581C87; --muted:#7E22CE;
+    --card-bg:linear-gradient(180deg,#FFFFFF,#FFF0FA); --card-shadow:0 16px 34px -24px rgba(76,29,149,0.45);
+    --border:#E9D5FF; --border-strong:#D8B4FE;
+    --field:#FFFFFF; --field-focus:#FFFFFF; --field-border:#E9D5FF; --placeholder:#A78BFA;
+    --accent:#DB2777; --accent-hover:#EC4899; --accent-soft:#FCE7F3; --soft-text:#9D174D;
+    --primary-from:#FF3388; --primary-to:#A21CAF; --primary-text:#FFFFFF;
+    --primary-hover-from:#FF4F9A; --primary-hover-to:#B32BC4;
+    --btn-glow:0 14px 26px -16px rgba(219,39,119,0.6);
+    --chip-from:#FF3388; --chip-to:#A21CAF; --chip-fg:#FFFFFF;
+    --badge-bg:#FCE7F3; --badge-fg:#9D174D; --badge-border:#F9A8D4;
+    --status-bg:#FFFFFF; --status-border:#E9D5FF; --status-fg:#581C87; --status-dot:#DB2777;
+    --seg-from:#FFD400; --seg-to:#FFB800; --seg-fg:#522B00; --seg-border:#F59E0B;
+    --view-bg:#FCE7F3; --view-border:#F472B6; --view-fg:#9D174D;
+    --vs-bg:rgba(255,255,255,0.55); --vs-border:rgba(233,213,255,0.95);
+    --card-edge:transparent; --card-edge-h:0px;
+    --display:"Outfit","Segoe UI",sans-serif;
+    --ui:"Space Grotesk","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:16px; --brand-track:0; --brand-transform:none; --brand-dy:4px;
+    --section-size:11px; --section-track:0.01em; --section-transform:none; --section-font:"Outfit","Segoe UI",sans-serif;
+    --button-size:12px; --button-track:0.01em; --button-transform:none; --button-font:"Space Grotesk","Segoe UI",sans-serif;
+    --status-size:11px; --status-track:0; --status-transform:none; --status-font:"Space Grotesk","Segoe UI",sans-serif;
+    --meta-track:1.1px; --meta-transform:uppercase; --meta-font:"Space Grotesk","Segoe UI",sans-serif;
+    --badge-track:0.36px; --badge-transform:none;
+    --suffix-color:#DB2777; --suffix-style:normal;
+    background:
+      radial-gradient(850px 620px at 55% -8%, rgba(201,182,242,0.75), transparent 70%),
+      radial-gradient(520px 420px at 2% 0%, rgba(226,62,158,0.55), transparent 68%),
+      radial-gradient(520px 460px at 99% 0%, rgba(143,166,242,0.65), transparent 68%),
+      radial-gradient(520px 420px at 72% 98%, rgba(255,201,107,0.45), transparent 68%),
+      linear-gradient(180deg,#FBF7FF,#FFF0F7);
+  }
+
+  .t-ozzy {
+    --text:#E8E1E0; --text2:#CDC7AA; --muted:#969177;
+    --card-bg:rgba(29,27,27,0.94); --card-shadow:none;
+    --border:#373434; --border-strong:#4B4731;
+    --field:#151313; --field-focus:#1B1818; --field-border:#373434; --placeholder:#969177;
+    --accent:#FBE500; --accent-hover:#FFF23D; --accent-soft:#373100; --soft-text:#FBE500;
+    --primary-from:#FBE500; --primary-to:#E8C900; --primary-text:#201C00;
+    --primary-hover-from:#FFF23D; --primary-hover-to:#F5D400;
+    --btn-glow:0 0 26px rgba(251,229,0,0.22);
+    --chip-from:#FBE500; --chip-to:#E8C900; --chip-fg:#201C00;
+    --badge-bg:#373100; --badge-fg:#FBE500; --badge-border:#706500;
+    --status-bg:rgba(20,18,18,0.92); --status-border:#373434; --status-fg:#FFB4A8; --status-dot:#FBE500;
+    --seg-from:#FBE500; --seg-to:#E8C900; --seg-fg:#201C00; --seg-border:#FBE500;
+    --view-bg:linear-gradient(135deg,#FBE500,#E8C900); --view-border:#FBE500; --view-fg:#201C00;
+    --vs-bg:rgba(21,19,19,0.6); --vs-border:rgba(55,52,52,0.9);
+    --card-edge:linear-gradient(90deg,#920703,#FBE500,#920703); --card-edge-h:2px; --card-edge-a:.55;
+    --display:"Anton","Segoe UI",sans-serif;
+    --ui:"Space Grotesk","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:17px; --brand-track:0.025em; --brand-transform:uppercase; --brand-dy:5px;
+    --section-size:11px; --section-track:0.08em; --section-transform:uppercase; --section-font:"Space Grotesk","Segoe UI",sans-serif;
+    --button-size:11px; --button-track:0.08em; --button-transform:uppercase; --button-font:"Space Grotesk","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.06em; --status-transform:uppercase; --status-font:"JetBrains Mono",Consolas,monospace;
+    --meta-track:0.1em; --meta-transform:uppercase; --meta-font:"JetBrains Mono",Consolas,monospace;
+    --badge-track:0.1em; --badge-transform:uppercase; --badge-font:"JetBrains Mono",Consolas,monospace;
+    --suffix-color:#FBE500; --suffix-style:normal;
+    background:
+      radial-gradient(760px 540px at 84% -12%, rgba(146,7,3,0.55), transparent 68%),
+      radial-gradient(520px 420px at -4% 24%, rgba(146,7,3,0.35), transparent 66%),
+      radial-gradient(520px 380px at 12% 112%, rgba(251,229,0,0.08), transparent 68%),
+      linear-gradient(180deg,#0B0A0A,#1A1010);
+  }
+  .t-ozzy .brand-title { font-weight: 400; }
+  .t-ozzy .starfield { display: none; }
+
+  .t-lana {
+    --text:#25181C; --text2:#5B4040; --muted:#894C5A;
+    --card-bg:rgba(255,253,252,0.94); --card-shadow:0 14px 30px -22px rgba(37,24,28,0.45);
+    --border:#E3BDBD; --border-strong:#C81D3B;
+    --field:#FFFDFC; --field-focus:#FFF8F8; --field-border:#E3BDBD; --placeholder:#B98A94;
+    --accent:#A10028; --accent-hover:#C81D3B; --accent-soft:#FFE8ED; --soft-text:#A10028;
+    --primary-from:#C81D3B; --primary-to:#A10028; --primary-text:#FFFFFF;
+    --primary-hover-from:#D92B4A; --primary-hover-to:#B3002D;
+    --btn-glow:0 14px 26px -16px rgba(161,0,40,0.55);
+    --chip-from:#C81D3B; --chip-to:#A10028; --chip-fg:#FFFFFF;
+    --badge-bg:#FFE8ED; --badge-fg:#A10028; --badge-border:#E3BDBD;
+    --status-bg:#FFF0F3; --status-border:#E3BDBD; --status-fg:#5B4040; --status-dot:#A10028;
+    --seg-from:#C81D3B; --seg-to:#A10028; --seg-fg:#FFFFFF; --seg-border:#A10028;
+    --view-bg:linear-gradient(135deg,#C81D3B,#A10028); --view-border:#A10028; --view-fg:#FFFFFF;
+    --vs-bg:rgba(255,253,252,0.6); --vs-border:rgba(227,189,189,0.95);
+    --card-edge:#A10028; --card-edge-h:2px; --card-edge-a:.9;
+    --display:"Playfair Display",Georgia,serif;
+    --ui:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:17px; --brand-track:0; --brand-transform:none; --brand-dy:3px;
+    --section-size:12px; --section-track:0; --section-transform:none; --section-font:"Playfair Display",Georgia,serif;
+    --button-size:12px; --button-track:0; --button-transform:none; --button-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --status-size:11px; --status-track:0; --status-transform:none; --status-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --meta-track:1.1px; --meta-transform:uppercase; --meta-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --badge-track:0.36px; --badge-transform:none;
+    --suffix-color:#A10028; --suffix-style:italic;
+    background:
+      radial-gradient(620px 480px at 84% -12%, rgba(255,177,193,0.6), transparent 68%),
+      radial-gradient(520px 380px at 20% 12%, rgba(255,177,193,0.55), transparent 70%),
+      radial-gradient(520px 400px at 30% 100%, rgba(255,218,217,0.7), transparent 70%),
+      linear-gradient(180deg,#FFF8F8,#FFE8ED);
+  }
+  .t-lana .brand-title { font-weight: 600; }
+
+  .t-acai {
+    --text:#F3E8FF; --text2:#D8B4FE; --muted:#C084FC;
+    --card-bg:rgba(31,0,43,0.9); --card-shadow:none;
+    --border:#4C1D6B; --border-strong:#872EAC;
+    --field:#1A0226; --field-focus:#230330; --field-border:#4C1D6B; --placeholder:#C084FC;
+    --accent:#A855F7; --accent-hover:#C084FC; --accent-soft:#2F0840; --soft-text:#E9D5FF;
+    --primary-from:#F59E0B; --primary-to:#FBBF24; --primary-text:#201C00;
+    --primary-hover-from:#FBBF24; --primary-hover-to:#FCD34D;
+    --btn-glow:0 0 28px rgba(245,158,11,0.3);
+    --chip-from:#7E22CE; --chip-to:#A855F7; --chip-fg:#FFFFFF;
+    --badge-bg:#2F0840; --badge-fg:#FCD34D; --badge-border:#F59E0B;
+    --status-bg:#1A0226; --status-border:#4C1D6B; --status-fg:#D8B4FE; --status-dot:#FBBF24;
+    --seg-from:#7E22CE; --seg-to:#A855F7; --seg-fg:#FFFFFF; --seg-border:#C084FC;
+    --view-bg:linear-gradient(135deg,#7E22CE,#A855F7); --view-border:#C084FC; --view-fg:#FFFFFF;
+    --vs-bg:rgba(26,2,38,0.6); --vs-border:rgba(76,29,107,0.9);
+    --card-edge:#F59E0B; --card-edge-h:1px; --card-edge-a:.55;
+    --display:"Sora","Segoe UI",sans-serif;
+    --ui:"Sora","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:16px; --brand-track:0; --brand-transform:none; --brand-dy:4px;
+    --section-size:11px; --section-track:0.005em; --section-transform:none; --section-font:"Sora","Segoe UI",sans-serif;
+    --button-size:12px; --button-track:0.005em; --button-transform:none; --button-font:"Sora","Segoe UI",sans-serif;
+    --status-size:11px; --status-track:0; --status-transform:none; --status-font:"Sora","Segoe UI",sans-serif;
+    --meta-track:1.1px; --meta-transform:uppercase; --meta-font:"Sora","Segoe UI",sans-serif;
+    --badge-track:0.36px; --badge-transform:none;
+    --suffix-color:#FBBF24; --suffix-style:normal;
+    background:
+      radial-gradient(760px 560px at 84% -10%, rgba(126,34,206,0.55), transparent 68%),
+      radial-gradient(560px 400px at 12% 108%, rgba(245,158,11,0.14), transparent 68%),
+      linear-gradient(180deg,#14001C,#21042E);
+  }
+
+  /* ── temas secretos: vaporwave, alien, wolverine, flower boy, natal, leila ── */
+  .t-vaporwave {
+    --text:#E8DDFE; --text2:#E5BCC5; --muted:#B9A7D6;
+    --card-bg:rgba(34,28,52,0.88); --card-shadow:none;
+    --border:#2D263F; --border-strong:#4A3F66;
+    --field:#100A21; --field-focus:#151027; --field-border:#2D263F; --placeholder:#8F7FAF;
+    --accent:#00EEFC; --accent-hover:#7DF4FF; --accent-soft:#00363A; --soft-text:#7DF4FF;
+    --primary-from:#FF4A8D; --primary-to:#DC7600; --primary-text:#590028;
+    --primary-hover-from:#FF6FA3; --primary-hover-to:#E88800;
+    --btn-glow:0 0 26px rgba(255,74,141,0.32);
+    --chip-from:#FF4A8D; --chip-to:#DC7600; --chip-fg:#590028;
+    --badge-bg:#2D263F; --badge-fg:#D3FBFF; --badge-border:#3C354F;
+    --status-bg:#151027; --status-border:#2D263F; --status-fg:#7DF4FF; --status-dot:#00EEFC;
+    --seg-from:#FFB77F; --seg-to:#FF8A3D; --seg-fg:#4E2600; --seg-border:#FFD1A8;
+    --view-bg:#FF4A8D; --view-border:#FFB1C4; --view-fg:#590028;
+    --vs-bg:rgba(21,16,39,0.6); --vs-border:rgba(45,38,63,0.9);
+    --card-edge:linear-gradient(90deg,#FF4A8D,#00EEFC); --card-edge-h:1px; --card-edge-a:.75;
+    --display:"Playfair Display",Georgia,serif;
+    --ui:"Chivo","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:20px; --brand-track:0.02em; --brand-transform:uppercase; --brand-dy:3px;
+    --section-size:13px; --section-track:0.06em; --section-transform:uppercase; --section-font:"Playfair Display",Georgia,serif;
+    --button-size:12px; --button-track:0.06em; --button-transform:uppercase; --button-font:"Chivo","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.08em; --status-transform:uppercase; --status-font:"JetBrains Mono",Consolas,monospace;
+    --meta-track:0.1em; --meta-transform:uppercase; --meta-font:"JetBrains Mono",Consolas,monospace;
+    --badge-track:0.08em; --badge-transform:uppercase; --badge-font:"JetBrains Mono",Consolas,monospace;
+    --suffix-color:#FFB1C4; --suffix-style:normal; --suffix-size:11px;
+    background:
+      radial-gradient(760px 520px at 82% -8%, rgba(255,74,141,0.34), transparent 66%),
+      radial-gradient(620px 420px at 82% 17%, rgba(220,118,0,0.20), transparent 62%),
+      radial-gradient(700px 420px at 3% 52%, rgba(0,238,252,0.10), transparent 68%),
+      linear-gradient(180deg,#1E182E,#100A21);
+  }
+  .t-vaporwave .sky::after {
+    content: ""; position: absolute; inset: 60% 0 0 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(0,238,252,0.10) 0 1px, transparent 1px 96px),
+      repeating-linear-gradient(0deg, rgba(255,74,141,0.10) 0 1px, transparent 1px 44px);
+    transform: perspective(320px) rotateX(58deg);
+    transform-origin: top center;
+  }
+
+  .t-alien {
+    --text:#EDFFE8; --text2:#B9CCB5; --muted:#849581;
+    --card-bg:rgba(25,28,27,0.92); --card-shadow:none;
+    --border:#282B29; --border-strong:#3A3D3B;
+    --field:#0C0F0E; --field-focus:#111413; --field-border:#1D201F; --placeholder:#849581;
+    --accent:#00FF66; --accent-hover:#6BFF83; --accent-soft:#003911; --soft-text:#6BFF83;
+    --primary-from:#00FF66; --primary-to:#00E55B; --primary-text:#002107;
+    --primary-hover-from:#6BFF83; --primary-hover-to:#00FF66;
+    --btn-glow:0 0 24px rgba(0,255,102,0.28);
+    --chip-from:#00FF66; --chip-to:#00E55B; --chip-fg:#002107;
+    --badge-bg:#003911; --badge-fg:#6BFF83; --badge-border:#007128;
+    --status-bg:#0C0F0E; --status-border:#282B29; --status-fg:#B9CCB5; --status-dot:#00FF66;
+    --seg-from:#00FF66; --seg-to:#00E55B; --seg-fg:#002107; --seg-border:#6BFF83;
+    --view-bg:#00FF66; --view-border:#6BFF83; --view-fg:#002107;
+    --vs-bg:rgba(12,15,14,0.6); --vs-border:rgba(40,43,41,0.9);
+    --card-edge:linear-gradient(90deg,#00FF66,#00E55B); --card-edge-h:1px; --card-edge-a:.6;
+    --card-radius:4px; --chip-radius:2px; --field-radius:6px;
+    --display:"JetBrains Mono",monospace; --ui:"JetBrains Mono",monospace;
+    --mono:"JetBrains Mono",monospace;
+    --brand-size:18px; --brand-track:0.04em; --brand-transform:uppercase; --brand-dy:3px;
+    --section-size:10px; --section-track:0.08em; --section-transform:uppercase; --section-font:"JetBrains Mono",monospace;
+    --button-size:11px; --button-track:0.07em; --button-transform:uppercase; --button-font:"JetBrains Mono",monospace;
+    --status-size:10px; --status-track:0.1em; --status-transform:uppercase; --status-font:"JetBrains Mono",monospace;
+    --meta-track:0.1em; --meta-transform:uppercase; --meta-font:"JetBrains Mono",monospace;
+    --badge-track:0.1em; --badge-transform:uppercase; --badge-font:"JetBrains Mono",monospace;
+    --suffix-color:#6BFF83; --suffix-style:normal;
+    background:
+      radial-gradient(700px 480px at 86% -8%, rgba(0,255,102,0.16), transparent 64%),
+      linear-gradient(180deg,#111413,#0C0F0E);
+  }
+  .t-alien .sky::after {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, rgba(0,255,102,0.05) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(0deg, rgba(0,255,102,0.05) 0 1px, transparent 1px 34px),
+      repeating-linear-gradient(0deg, rgba(237,255,232,0.03) 0 1px, transparent 1px 3px);
+  }
+
+  .t-wolverine {
+    --text:#131B2E; --text2:#4F4633; --muted:#7A6E58;
+    --card-bg:linear-gradient(180deg,#FFFFFF,#F7F8FF); --card-shadow:0 14px 30px -22px rgba(19,27,46,0.4);
+    --border:#131B2E; --border-strong:#3B5E9A;
+    --field:#F7F8FF; --field-focus:#FFFFFF; --field-border:#C9CFE6; --placeholder:#7A6E58;
+    --field-hover:#3B5E9A;
+    --accent:#3B5E9A; --accent-hover:#4F73B8; --accent-soft:#EAEDFF; --soft-text:#131B2E;
+    --primary-from:#F5BA13; --primary-to:#FFC933; --primary-text:#131B2E;
+    --primary-hover-from:#FFC94A; --primary-hover-to:#FFD766;
+    --btn-glow:0 12px 24px -14px rgba(245,186,19,0.85);
+    --chip-from:#F5BA13; --chip-to:#FFC933; --chip-fg:#131B2E; --chip-radius:2px;
+    --badge-bg:#131B2E; --badge-fg:#FFFFFF; --badge-border:#F5BA13;
+    --status-bg:#EAEDFF; --status-border:#3B5E9A; --status-fg:#131B2E; --status-dot:#F5BA13;
+    --seg-from:#F5BA13; --seg-to:#FFC933; --seg-fg:#131B2E; --seg-border:#131B2E;
+    --view-bg:linear-gradient(135deg,#F5BA13,#FFC933); --view-border:#131B2E; --view-fg:#131B2E;
+    --vs-bg:rgba(255,255,255,0.55); --vs-border:rgba(19,27,46,0.35);
+    --card-edge:linear-gradient(90deg,#F5BA13,#3B5E9A); --card-edge-h:2px; --card-edge-a:.85;
+    --card-radius:6px;
+    --display:"Chivo","Segoe UI",sans-serif; --ui:"Space Grotesk","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:18px; --brand-track:0.03em; --brand-transform:uppercase; --brand-dy:3px;
+    --section-size:12px; --section-track:0.05em; --section-transform:uppercase; --section-font:"Space Grotesk","Segoe UI",sans-serif;
+    --button-size:11px; --button-track:0.05em; --button-transform:uppercase; --button-font:"Chivo","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.08em; --status-transform:uppercase; --status-font:"Space Grotesk","Segoe UI",sans-serif;
+    --meta-track:0.08em; --meta-transform:uppercase; --meta-font:"Space Grotesk","Segoe UI",sans-serif;
+    --badge-track:0.08em; --badge-transform:uppercase; --badge-font:"Space Grotesk","Segoe UI",sans-serif;
+    --suffix-color:#131B2E; --suffix-style:normal; --suffix-bg:#F5BA13; --suffix-pad:0 3px;
+    background:
+      radial-gradient(560px 420px at 96% 4%, rgba(59,94,154,0.16), transparent 70%),
+      radial-gradient(circle at 50% 50%, rgba(59,94,154,0.16) 0.8px, transparent 1px) 0 0 / 10px 10px,
+      linear-gradient(180deg,#FAF8FF,#EAEDFF);
+  }
+  .t-wolverine .logo { background:#F5BA13; border:1px solid #131B2E; border-radius:7px; }
+  .t-wolverine .logo-emoji { font-size: 23px; }
+
+  .t-flowerboy {
+    --text:#2B1709; --text2:#534434; --muted:#855300;
+    --card-bg:linear-gradient(180deg,#FFFFFF,#FFF8F5); --card-shadow:0 16px 32px -24px rgba(133,83,0,0.4);
+    --border:#F2DCCB; --border-strong:#D8C3AD;
+    --field:#FFF8F5; --field-focus:#FFFFFF; --field-border:#F2DCCB; --placeholder:#8A6248;
+    --field-hover:#A88164;
+    --accent:#3B6934; --accent-hover:#4C8043; --accent-soft:#FFEADF; --soft-text:#A83900;
+    --primary-from:#F59E0B; --primary-to:#FC6018; --primary-text:#2B1709;
+    --primary-hover-from:#FFB02E; --primary-hover-to:#FF7A33;
+    --btn-glow:0 14px 26px -16px rgba(245,158,11,0.7);
+    --chip-from:#F59E0B; --chip-to:#FC6018; --chip-fg:#2B1709;
+    --badge-bg:#FFEADF; --badge-fg:#A83900; --badge-border:#F2DCCB;
+    --status-bg:#FFF8F5; --status-border:#F2DCCB; --status-fg:#534434; --status-dot:#3B6934;
+    --seg-from:#F59E0B; --seg-to:#FC6018; --seg-fg:#2B1709; --seg-border:#D8C3AD;
+    --view-bg:linear-gradient(135deg,#F59E0B,#FC6018); --view-border:#D8C3AD; --view-fg:#2B1709;
+    --vs-bg:rgba(255,248,245,0.6); --vs-border:rgba(242,220,203,0.95);
+    --card-edge:linear-gradient(90deg,#F59E0B,#FC6018); --card-edge-h:1px; --card-edge-a:.55;
+    --card-radius:20px;
+    --display:"Playfair Display",Georgia,serif; --ui:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:20px; --brand-track:0.01em; --brand-transform:uppercase; --brand-dy:3px;
+    --section-size:12px; --section-track:0.04em; --section-transform:uppercase; --section-font:"Playfair Display",Georgia,serif;
+    --button-size:11px; --button-track:0.04em; --button-transform:uppercase; --button-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.06em; --status-transform:uppercase; --status-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --meta-track:0.06em; --meta-transform:uppercase; --meta-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --badge-track:0.06em; --badge-transform:uppercase; --badge-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --suffix-color:#A83900; --suffix-style:normal;
+    background:
+      radial-gradient(680px 480px at 84% 8%, rgba(245,158,11,0.28), transparent 66%),
+      radial-gradient(900px 300px at 20% 104%, rgba(59,105,52,0.14), transparent 70%),
+      linear-gradient(180deg,#FFF8F5,#FFEADF);
+  }
+  .t-flowerboy .logo { background:#FFF8F5; border:1px solid #F2DCCB; border-radius:7px; }
+  .t-flowerboy .logo-emoji { font-size: 23px; }
+
+  .t-natal {
+    --text:#151D1A; --text2:#5B4040; --muted:#6B7C72;
+    --card-bg:linear-gradient(180deg,#FFFFFF,#F7FCF8); --card-shadow:0 14px 30px -22px rgba(21,29,26,0.4);
+    --border:#D6E8DC; --border-strong:#B8D4C2;
+    --field:#FFFFFF; --field-focus:#F7FCF8; --field-border:#D6E8DC; --placeholder:#7C8D82;
+    --field-hover:#A9C7B6;
+    --accent:#286B41; --accent-hover:#2F7D4C; --accent-soft:#E6F0EA; --soft-text:#07522B;
+    --primary-from:#C41E3A; --primary-to:#9E0027; --primary-text:#FFFFFF;
+    --primary-hover-from:#D92E4B; --primary-hover-to:#B01230;
+    --btn-glow:0 14px 26px -16px rgba(196,30,58,0.6);
+    --chip-from:#C41E3A; --chip-to:#9E0027; --chip-fg:#FFFFFF;
+    --badge-bg:#FFE9E6; --badge-fg:#9E0027; --badge-border:#F3C7C0;
+    --status-bg:#FFFFFF; --status-border:#D6E8DC; --status-fg:#5B4040; --status-dot:#286B41;
+    --seg-from:#C41E3A; --seg-to:#9E0027; --seg-fg:#FFFFFF; --seg-border:#9E0027;
+    --view-bg:linear-gradient(135deg,#286B41,#07522B); --view-border:#286B41; --view-fg:#FFFFFF;
+    --vs-bg:rgba(255,255,255,0.55); --vs-border:rgba(214,232,220,0.95);
+    --card-edge:linear-gradient(90deg,#C41E3A,#FABC4C); --card-edge-h:2px; --card-edge-a:.7;
+    --card-radius:16px; --chip-radius:12px;
+    --display:"Playfair Display",Georgia,serif; --ui:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --mono:"JetBrains Mono",Consolas,monospace;
+    --brand-size:20px; --brand-track:0; --brand-transform:none; --brand-dy:2px;
+    --section-size:11px; --section-track:0.06em; --section-transform:uppercase; --section-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --button-size:11px; --button-track:0.05em; --button-transform:uppercase; --button-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.06em; --status-transform:uppercase; --status-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --meta-track:0.06em; --meta-transform:uppercase; --meta-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --badge-track:0.05em; --badge-transform:uppercase; --badge-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --suffix-color:#C41E3A; --suffix-style:normal;
+    background:
+      radial-gradient(620px 460px at 86% -8%, rgba(45,111,69,0.18), transparent 68%),
+      radial-gradient(520px 380px at 2% 96%, rgba(196,30,58,0.10), transparent 68%),
+      radial-gradient(circle at 90% 19%, rgba(250,188,76,0.16) 0 120px, transparent 121px),
+      linear-gradient(180deg,#F4FCF7,#E4F1E9);
+  }
+  .t-natal .logo { background:#9E0027; border:1px solid #FABC4C; border-radius:7px; }
+  .t-natal .logo-emoji { font-size: 23px; }
+
+  .t-leila {
+    --text:#121C2B; --text2:#434655; --muted:#7A87A3;
+    --card-bg:rgba(255,255,255,0.97); --card-shadow:0 16px 32px -24px rgba(18,28,43,0.35);
+    --border:#DEE8FE; --border-strong:#C3C6D7;
+    --field:#F0F3FF; --field-focus:#FFFFFF; --field-border:#DEE8FE; --placeholder:#8794AE;
+    --field-hover:#B9C8E8;
+    --accent:#2563EB; --accent-hover:#3B82F6; --accent-soft:#E7EEFF; --soft-text:#004AC6;
+    --primary-from:#2563EB; --primary-to:#004AC6; --primary-text:#FFFFFF;
+    --primary-hover-from:#3B82F6; --primary-hover-to:#2563EB;
+    --btn-glow:0 14px 26px -16px rgba(37,99,235,0.6);
+    --chip-from:#2563EB; --chip-to:#004AC6; --chip-fg:#FFFFFF;
+    --badge-bg:#E7EEFF; --badge-fg:#004AC6; --badge-border:#C9D5EE;
+    --status-bg:#FFFFFF; --status-border:#DEE8FE; --status-fg:#434655; --status-dot:#2563EB;
+    --seg-from:#2563EB; --seg-to:#004AC6; --seg-fg:#FFFFFF; --seg-border:#2563EB;
+    --view-bg:linear-gradient(135deg,#2563EB,#004AC6); --view-border:#2563EB; --view-fg:#FFFFFF;
+    --vs-bg:rgba(255,255,255,0.55); --vs-border:rgba(222,232,254,0.95);
+    --card-edge:transparent; --card-edge-h:0px;
+    --card-radius:16px; --field-radius:14px;
+    --pick-bg:linear-gradient(135deg,#FFDDB8,#FEA619); --pick-fg:#2A1700; --pick-border:#F0B060;
+    --display:"Plus Jakarta Sans","Segoe UI",sans-serif; --ui:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --mono:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --brand-size:20px; --brand-track:0; --brand-transform:none; --brand-dy:2px;
+    --brand-color:#2563EB;
+    --section-size:12px; --section-track:0; --section-transform:none; --section-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --button-size:11px; --button-track:0.04em; --button-transform:uppercase; --button-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --status-size:10px; --status-track:0.01em; --status-transform:none; --status-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --meta-track:0.06em; --meta-transform:uppercase; --meta-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --badge-track:0.04em; --badge-transform:none; --badge-font:"Plus Jakarta Sans","Segoe UI",sans-serif;
+    --suffix-color:#855300; --suffix-style:normal; --suffix-bg:#FFDDB8; --suffix-size:12px; --suffix-pad:0 4px;
+    background:
+      radial-gradient(620px 460px at 92% -4%, rgba(215,228,255,0.85), transparent 70%),
+      radial-gradient(520px 360px at 3% 102%, rgba(255,227,196,0.4), transparent 70%),
+      repeating-linear-gradient(90deg, rgba(185,200,232,0.14) 0 1px, transparent 1px 56px),
+      repeating-linear-gradient(0deg, rgba(185,200,232,0.14) 0 1px, transparent 1px 56px),
+      linear-gradient(180deg,#F7F9FF,#E9EFFF);
+  }
+  .t-leila .logo { background:#FFF3E3; border:1px solid #FEA619; border-radius:50%; }
+  .t-leila .logo-emoji { font-size: 23px; }
+  .t-leila .brand-sub { letter-spacing: 0.02em; }
+
+  /* ── theme backgrounds: patterns + covers ───────────────────────────── */
+  .cover { position: absolute; display: none; top: 44px; right: 20px; width: 560px; height: 560px; object-fit: cover; pointer-events: none; }
+  .t-graduation .cover--grad { display: block; opacity: 0.4; }
+  .t-ozzy .cover--ozzy { display: block; opacity: 0.55; width: 540px; height: 540px; }
+  .t-flowerboy .cover--flower { display: block; opacity: 0.3; }
+  .cover {
+    -webkit-mask-image: linear-gradient(180deg,#000 0%,#000 55%,rgba(0,0,0,0.47) 82%,transparent 100%), linear-gradient(90deg,transparent 0%,rgba(0,0,0,0.82) 28%,#000 93%,transparent 100%);
+    mask-image: linear-gradient(180deg,#000 0%,#000 55%,rgba(0,0,0,0.47) 82%,transparent 100%), linear-gradient(90deg,transparent 0%,rgba(0,0,0,0.82) 28%,#000 93%,transparent 100%);
+    mask-composite: intersect;
+    -webkit-mask-composite: source-in;
+  }
+  .ozzy-scan { position: absolute; inset: 0; display: none; background: repeating-linear-gradient(180deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 3px); }
+  .t-ozzy .ozzy-scan { display: block; }
+  .leila-art { position: absolute; display: none; right: 30px; bottom: 99px; height: 357px; width: auto; pointer-events: none; }
+  .leila-art--solo { left: 30px; right: auto; height: 193px; opacity: 0.34; }
+  .t-leila .leila-art { display: block; }
+
+  /* ── focus ─────────────────────────────────────────────────────────── */
+  button:focus-visible, input:focus-visible, textarea:focus-visible {
+    outline: 2px solid var(--soft-text);
+    outline-offset: 2px;
+  }
+
+  /* ── theme rail (presentation, outside the app) ────────────────────── */
+  .rail {
+    display: flex; align-items: center; gap: 14px;
+    width: 1280px; height: 104px;
+    padding: 0 18px;
+    border-top: 1px solid rgba(27, 58, 92, 0.65);
+    background: #040b13;
+    font-family: "Segoe UI", system-ui, sans-serif;
+  }
+  .rail-head { width: 132px; flex: none; }
+  .rail-head b {
+    display: block;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 9px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #55ceff;
+  }
+  .rail-head span { display: block; margin-top: 5px; font-size: 9px; line-height: 1.4; color: #6f8cab; }
+  .rail-list { display: flex; gap: 3px; flex: 1; flex-wrap: wrap; }
+  .tbtn {
+    display: flex; align-items: center; gap: 6px;
+    height: 42px; padding: 0 8px;
+    border: 1px solid transparent; border-radius: 8px;
+    background: transparent;
+    color: #94b4d4;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 9.5px; font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .tbtn:hover { background: rgba(22, 43, 68, 0.55); color: #e8f0fe; }
+  .tbtn.is-active { border-color: rgba(85, 206, 255, 0.45); background: rgba(17, 34, 54, 0.75); color: #e8f0fe; }
+  .tbtn i { width: 14px; height: 14px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.14); flex: none; }
+  .sw-dark { background: linear-gradient(135deg,#091522,#1b3a5c); }
+  .sw-light { background: linear-gradient(135deg,#e7f2fd,#bfe4fb); }
+  .sw-graduation { background: linear-gradient(135deg,#ff7ab8,#8fa6f2); }
+  .sw-ozzy { background: linear-gradient(135deg,#0b0a0a 0 40%,#920703 55%,#fbe500 100%); }
+  .sw-lana { background: linear-gradient(135deg,#fff8f8,#c81d3b); }
+  .sw-acai { background: linear-gradient(135deg,#14001c,#7e22ce 65%,#fbbf24); }
+  .sw-vaporwave { background: linear-gradient(135deg,#1e182e,#ff4a8d 55%,#00eefc); }
+  .sw-alien { background: linear-gradient(135deg,#111413,#00ff66); }
+  .sw-wolverine { background: linear-gradient(135deg,#faf8ff,#f5ba13 55%,#3b5e9a); }
+  .sw-flowerboy { background: linear-gradient(135deg,#ffeadf,#f59e0b 60%,#3b6934); }
+  .sw-natal { background: linear-gradient(135deg,#f4fcf7,#286b41 55%,#c41e3a); }
+  .sw-leila { background: linear-gradient(135deg,#f7f9ff,#fea619); }
+  .rail-note {
+    width: 148px; flex: none; text-align: right;
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 8px; line-height: 1.6; letter-spacing: 0.04em; text-transform: uppercase; color: #4f6b85;
+  }
+  .rail-note b { color: #7fb4dc; font-weight: 500; }
+</style>
+</helmet>
+
+<div class="board">
+  <div class="app {{ skin }}">
+    <div class="sky">
+      <div class="starfield" aria-hidden="true"></div>
+      <div class="ozzy-scan" aria-hidden="true"></div>
+      <img class="cover cover--grad" src="/_blob/baf4e90b85e1802138cd571b985a6abc" alt="" aria-hidden="true">
+      <img class="cover cover--ozzy" src="/_blob/493d3e94d47becb5bc6517d9793961e0" alt="" aria-hidden="true">
+      <img class="cover cover--flower" src="/_blob/493d3e94d47becb5bc6517d9793961e0" alt="" aria-hidden="true">
+      <img class="leila-art" src="/_blob/001d703b2bf8ef6873d43dcdbb999874" alt="" aria-hidden="true">
+      <img class="leila-art leila-art--solo" src="/_blob/4b10eb2b3b744104ff5ee8ed8090ff20" alt="" aria-hidden="true">
+    </div>
+
+    <div class="shell">
+      <div class="topbar">
+        <div class="meta">Feito por Gustavo Pinheiro</div>
+        <div class="top-actions">
+          <button class="icon-btn" type="button" aria-label="Configurações">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3.1"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1.03 1.56V21a2 2 0 1 1-4 0v-.09A1.7 1.7 0 0 0 8.9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1.03H3a2 2 0 1 1 0-4h.09A1.7 1.7 0 0 0 4.6 8.9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 8.9 4.6a1.7 1.7 0 0 0 1.03-1.55V3a2 2 0 1 1 4 0v.09A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 8.9v.06A1.7 1.7 0 0 0 20.94 10H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1.03z"/></svg>
+          </button>
+          <button class="toggle" type="button" onClick="{{ toggleTheme }}" aria-label="Alternar entre tema escuro e claro">
+            <span class="moon">☾</span><span class="sun">☀</span><i class="knob"></i>
+          </button>
+        </div>
+      </div>
+
+      <header class="brand-card">
+        <div class="logo">
+          <img class="{{ iconClass }}" src="{{ iconSrc }}" alt="">
+          <span class="logo-emoji {{ emojiClass }}">{{ emoji }}</span>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">{{ brandLabel }}<span class="suffix">{{ suffix }}</span></div>
+          <div class="brand-sub">{{ brandSub }}</div>
+        </div>
+        <span class="badge">XLS → XLSX</span>
+      </header>
+
+      <div class="viewswitch" role="group" aria-label="Tela">
+        <button class="vt {{ gerarTab }}" type="button" onClick="{{ goGerar }}">Gerar Excel</button>
+        <button class="vt {{ envioTab }}" type="button" onClick="{{ goEnvio }}">Envio de e-mails</button>
+      </div>
+
+      <!-- ── tela 1: gerar excel ─────────────────────────────────────── -->
+      <div class="page {{ gerarHidden }}">
+        <div class="group">
+          <div class="section"><span class="chip">1</span><span class="st">Nome do arquivo de saída</span></div>
+          <input class="field" type="text" placeholder="ex.: relatorio_outubro" aria-label="Nome do arquivo de saída" autocomplete="off">
+        </div>
+
+        <div class="group">
+          <div class="section"><span class="chip">2</span><span class="st">Pasta com os arquivos de entrada</span></div>
+          <div class="row">
+            <input class="field" type="text" placeholder="Selecione a pasta..." aria-label="Pasta com os arquivos de entrada" autocomplete="off">
+            <button class="icon-btn--field" type="button" aria-label="Selecionar pasta de entrada">
+              <svg viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4.4h6.6l2 2.3h7.4v11H1z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="section"><span class="chip">3</span><span class="st">Separação das abas</span></div>
+          <div class="seg" role="group" aria-label="Separar abas por">
+            <sc-for list="{{ segs }}" as="s">
+              <button class="sg {{ s.cls }}" type="button" onClick="{{ s.pick }}">{{ s.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="section"><span class="chip">4</span><span class="st">Personalização</span></div>
+          <button class="select" type="button">
+            <span>Azul</span>
+            <svg viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.4 1.8 6 6.2l4.6-4.4"/></svg>
+          </button>
+        </div>
+
+        <div class="group">
+          <div class="section"><span class="chip">5</span><span class="st">Destino do arquivo final</span></div>
+          <div class="row">
+            <input class="field" type="text" placeholder="Selecione onde salvar..." aria-label="Destino do arquivo final" autocomplete="off">
+            <button class="icon-btn--field" type="button" aria-label="Selecionar pasta de destino">
+              <svg viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4.4h6.6l2 2.3h7.4v11H1z"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="spacer"></div>
+        <div class="divider"></div>
+        <div class="actions">
+          <button class="btn btn--ghost" type="button" onClick="{{ limpar }}">Limpar campos</button>
+          <button class="btn btn--primary" type="button" onClick="{{ simulate }}">
+            <svg viewBox="0 0 10 12" fill="currentColor" aria-hidden="true"><path d="M1 1l8 5-8 5z"/></svg>
+            Gerar Excel
+          </button>
+        </div>
+      </div>
+
+      <!-- ── tela 2: envio de e-mails ────────────────────────────────── -->
+      <div class="page {{ envioHidden }}">
+        <div class="group">
+          <div class="section"><span class="chip">1</span><span class="st">Planilha de contatos</span></div>
+          <div class="row">
+            <input class="field" type="text" placeholder="Transportadora · Fornecedor · E-mails (arquivo .xlsx)" aria-label="Planilha de contatos" autocomplete="off">
+            <button class="icon-btn--field" type="button" aria-label="Selecionar planilha de contatos">
+              <svg viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 1.4h12.2l4.8 4.6v14.6H3.5z"/><path d="M15.7 1.4v4.6h4.8"/><path d="M6.6 11.4h10.4M6.6 14.6h10.4M6.6 17.8h6.6"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="section"><span class="chip">2</span><span class="st">Pasta com os relatórios gerados</span></div>
+          <div class="row">
+            <input class="field" type="text" placeholder="Selecione a pasta..." aria-label="Pasta com os relatórios gerados" autocomplete="off">
+            <button class="icon-btn--field" type="button" aria-label="Selecionar pasta dos relatórios">
+              <svg viewBox="0 0 24 22" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 4.4h6.6l2 2.3h7.4v11H1z"/></svg>
+            </button>
+          </div>
+          <p class="hint">Um arquivo pode conter vários códigos de fornecedor, desde que todos sejam da mesma transportadora.</p>
+        </div>
+
+        <div class="page" style="flex: 1;">
+          <div class="section"><span class="chip">3</span><span class="st">Mensagem</span></div>
+          <div class="msg-row">
+            <span class="sub-label">Assunto</span>
+            <div class="mini-actions">
+              <button class="mini" type="button">Inserir {fornecedor}</button>
+              <button class="mini" type="button">Restaurar</button>
+            </div>
+          </div>
+          <input class="field" type="text" value="{fornecedor} — Relatório de pagamento" aria-label="Assunto do e-mail" autocomplete="off">
+          <div style="height: 10px;"></div>
+          <div class="sub-label" style="margin-bottom: 5px;">Corpo</div>
+          <textarea class="body-field" aria-label="Corpo do e-mail">Olá equipe {fornecedor}, tudo bem?
+
+Segue em anexo o relatório de pagamento referente ao último pagamento realizado.
+
+Em caso de dúvidas, permanecemos à disposição.
+
+Atenciosamente,
+Time Fretes - Distribuição Farma</textarea>
+        </div>
+
+        <div class="envio-foot">
+          <p class="hint">Pronto para preparar os envios.</p>
+          <button class="btn btn--primary btn--mail" type="button" onClick="{{ simulateEnvio }}">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+            Preparar envios
+          </button>
+        </div>
+      </div>
+
+      <div class="status"><span class="dot" aria-hidden="true"></span><span>{{ status }}</span></div>
+    </div>
+  </div>
+
+  <div class="rail">
+    <div class="rail-head">
+      <b>Temas do app</b>
+      <span>Clique para trocar. O estado da tela permanece.</span>
+    </div>
+    <div class="rail-list" role="group" aria-label="Temas do PagFlow">
+      <sc-for list="{{ themes }}" as="t">
+        <button class="tbtn {{ t.cls }}" type="button" onClick="{{ t.pick }}" title="Tema {{ t.name }}">
+          <i class="sw-{{ t.swatch }}" aria-hidden="true"></i>
+          {{ t.name }}
+        </button>
+      </sc-for>
+    </div>
+    <div class="rail-note">Simulação<br>visual · <b>12 temas</b><br><br>configurações e revisão de envio na réplica completa:<br><b>pagflow/index.html</b></div>
+  </div>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1064}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = {
+      skin: "t-dark",
+      screen: 0,
+      seg: 3,
+      status: "Pronto para uso."
+    };
+  }
+
+  componentDidMount() {
+    var map = {
+      dark: "t-dark", light: "t-light", graduation: "t-graduation",
+      ozzy: "t-ozzy", lana: "t-lana", acai: "t-acai",
+      vaporwave: "t-vaporwave", alien: "t-alien", wolverine: "t-wolverine",
+      flowerboy: "t-flowerboy", natal: "t-natal", leila: "t-leila"
+    };
+    try {
+      var hash = String(window.location.hash || "").replace(/^#/, "");
+      if (map[hash]) this.setState({ skin: map[hash] });
+    } catch (e) {}
+  }
+
+  renderVals() {
+    var themes = [
+      { id: "t-dark", key: "dark", name: "Escuro", label: "PagFlow", suffix: "", emoji: "", icon: true, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-light", key: "light", name: "Claro", label: "PagFlow", suffix: "", emoji: "", icon: true, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-graduation", key: "graduation", name: "Graduation", label: "PagFlow", suffix: "Graduation", emoji: "🐻", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-ozzy", key: "ozzy", name: "Ozzy", label: "PAGFLOW", suffix: "OZZY", emoji: "🦇", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-lana", key: "lana", name: "Lana Del Rey", label: "PagFlow", suffix: "Lana Del Rey", emoji: "🍒", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-acai", key: "acai", name: "Açaí", label: "PagFlow", suffix: "Açaí", emoji: "🫐", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-vaporwave", key: "vaporwave", name: "Vaporwave", label: "PagFlow", suffix: "LA NEON NIGHTS", emoji: "🌴", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-alien", key: "alien", name: "Alien", label: "PAGFLOW", suffix: "MU-TH-UR", emoji: "👽", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-wolverine", key: "wolverine", name: "Wolverine", label: "PAGFLOW", suffix: "WOLVERINE", emoji: "🐺", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-flowerboy", key: "flowerboy", name: "Flower Boy", label: "PAGFLOW", suffix: "FLOWER BOY", emoji: "🌻", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-natal", key: "natal", name: "Natal", label: "PagFlow", suffix: "Natal", emoji: "🎄", icon: false, sub: "Consolidação de pagamentos SAP" },
+      { id: "t-leila", key: "leila", name: "Leila", label: "PagFlow", suffix: "Leila", emoji: "🐶", icon: false, sub: "LEILA EU TE AMO" }
+    ];
+    var current = themes[0];
+    for (var i = 0; i < themes.length; i++) {
+      if (themes[i].id === this.state.skin) current = themes[i];
+    }
+    var self = this;
+    return {
+      skin: this.state.skin,
+      brandLabel: current.label,
+      brandSub: current.sub,
+      suffix: current.suffix,
+      emoji: current.emoji,
+      iconSrc: current.key === "light" ? "/_blob/c3caecf838d40426d274f61b3ef8469d" : "/_blob/757bd8db53593e7637931523e65a21a8",
+      iconClass: current.icon ? "" : "is-hidden",
+      emojiClass: current.icon ? "is-hidden" : "",
+      status: this.state.status,
+      gerarHidden: this.state.screen === 0 ? "" : "is-hidden",
+      envioHidden: this.state.screen === 1 ? "" : "is-hidden",
+      gerarTab: this.state.screen === 0 ? "is-active" : "",
+      envioTab: this.state.screen === 1 ? "is-active" : "",
+      goGerar: function () { self.setState({ screen: 0 }); },
+      goEnvio: function () { self.setState({ screen: 1 }); },
+      toggleTheme: function () {
+        var light = self.state.skin === "t-light" || self.state.skin === "t-graduation"
+          || self.state.skin === "t-lana" || self.state.skin === "t-wolverine"
+          || self.state.skin === "t-flowerboy" || self.state.skin === "t-natal"
+          || self.state.skin === "t-leila";
+        self.setState({ skin: light ? "t-dark" : "t-light" });
+      },
+      simulate: function () { self.setState({ status: "Simulação visual — nenhum arquivo é gerado." }); },
+      simulateEnvio: function () { self.setState({ status: "Simulação visual — nenhum e-mail é enviado." }); },
+      limpar: function () { self.setState({ status: "Simulação visual — a limpeza está desativada." }); },
+      segs: ["Marca", "LNeg", "Fornecedor", "Não Separar"].map(function (label, index) {
+        return {
+          label: label,
+          cls: index === self.state.seg ? "is-active" : "",
+          pick: function () { self.setState({ seg: index }); }
+        };
+      }),
+      themes: themes.map(function (theme) {
+        return {
+          name: theme.name,
+          swatch: theme.key,
+          cls: theme.id === self.state.skin ? "is-active" : "",
+          pick: function () { self.setState({ skin: theme.id }); }
+        };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

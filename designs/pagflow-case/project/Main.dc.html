@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>PagFlow — visão geral</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="ds/guto-design-system/tokens.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #071220;
+    color: var(--text, #e8f0fe);
+    font-family: var(--font-sans, "Segoe UI", system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+  }
+  .case {
+    position: relative;
+    width: 1440px;
+    height: 1024px;
+    overflow: hidden;
+    background:
+      radial-gradient(900px 720px at 86% 0%, rgba(85, 206, 255, 0.14), transparent 62%),
+      radial-gradient(640px 520px at 6% 96%, rgba(44, 119, 198, 0.1), transparent 60%),
+      linear-gradient(180deg, var(--sky-top, #091522) 0%, var(--sky-bottom, #11263e) 100%);
+  }
+  .stars, .stars--fine { position: absolute; inset: 0; pointer-events: none; }
+  .stars {
+    background-image:
+      radial-gradient(1.6px 1.6px at 8% 14%, rgba(143, 224, 255, 0.9), transparent 60%),
+      radial-gradient(1.4px 1.4px at 19% 38%, rgba(156, 199, 255, 0.7), transparent 60%),
+      radial-gradient(1.8px 1.8px at 28% 9%, rgba(156, 199, 255, 0.85), transparent 60%),
+      radial-gradient(1.2px 1.2px at 41% 26%, rgba(143, 224, 255, 0.55), transparent 60%),
+      radial-gradient(1.5px 1.5px at 53% 7%, rgba(156, 199, 255, 0.8), transparent 60%),
+      radial-gradient(1.2px 1.2px at 64% 22%, rgba(156, 199, 255, 0.45), transparent 60%),
+      radial-gradient(1.8px 1.8px at 78% 12%, rgba(156, 199, 255, 0.9), transparent 60%),
+      radial-gradient(1.4px 1.4px at 92% 31%, rgba(156, 199, 255, 0.65), transparent 60%),
+      radial-gradient(1.3px 1.3px at 12% 62%, rgba(156, 199, 255, 0.55), transparent 60%),
+      radial-gradient(1.6px 1.6px at 23% 84%, rgba(143, 224, 255, 0.7), transparent 60%),
+      radial-gradient(1.2px 1.2px at 36% 73%, rgba(156, 199, 255, 0.4), transparent 60%),
+      radial-gradient(1.5px 1.5px at 49% 91%, rgba(156, 199, 255, 0.6), transparent 60%),
+      radial-gradient(1.3px 1.3px at 61% 66%, rgba(156, 199, 255, 0.5), transparent 60%),
+      radial-gradient(1.7px 1.7px at 74% 88%, rgba(143, 224, 255, 0.55), transparent 60%),
+      radial-gradient(1.2px 1.2px at 87% 72%, rgba(156, 199, 255, 0.45), transparent 60%),
+      radial-gradient(1.4px 1.4px at 96% 54%, rgba(156, 199, 255, 0.6), transparent 60%);
+  }
+  .stars--fine {
+    background-image:
+      radial-gradient(1px 1px at 4% 44%, rgba(156, 199, 255, 0.4), transparent 60%),
+      radial-gradient(1px 1px at 15% 22%, rgba(156, 199, 255, 0.35), transparent 60%),
+      radial-gradient(1px 1px at 31% 52%, rgba(156, 199, 255, 0.3), transparent 60%),
+      radial-gradient(1px 1px at 45% 41%, rgba(156, 199, 255, 0.35), transparent 60%),
+      radial-gradient(1px 1px at 57% 48%, rgba(156, 199, 255, 0.3), transparent 60%),
+      radial-gradient(1px 1px at 69% 36%, rgba(156, 199, 255, 0.35), transparent 60%),
+      radial-gradient(1px 1px at 81% 52%, rgba(156, 199, 255, 0.3), transparent 60%),
+      radial-gradient(1px 1px at 94% 86%, rgba(156, 199, 255, 0.35), transparent 60%);
+  }
+  .orbit {
+    position: absolute;
+    top: 64px;
+    right: -150px;
+    width: 880px;
+    height: 880px;
+    border: 1px solid rgba(85, 206, 255, 0.14);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .orbit--dash {
+    top: 200px;
+    right: -70px;
+    width: 660px;
+    height: 660px;
+    border-style: dashed;
+    border-color: rgba(85, 206, 255, 0.12);
+  }
+  .head {
+    position: absolute;
+    top: 44px;
+    left: 72px;
+    right: 72px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .brand { display: flex; align-items: center; gap: 11px; }
+  .brand img {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: 1px solid rgba(85, 206, 255, 0.24);
+    display: block;
+  }
+  .brand b { font-size: 14px; font-weight: 600; letter-spacing: -0.02em; }
+  .brand b span { color: var(--text-secondary, #94b4d4); font-weight: 400; }
+  .head .meta {
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--text-muted, #6f8cab);
+  }
+  .hero { position: absolute; left: 72px; top: 196px; width: 612px; }
+  .eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--celeste, #55ceff);
+  }
+  .eyebrow i {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--celeste, #55ceff);
+    box-shadow: 0 0 10px rgba(85, 206, 255, 0.9);
+  }
+  .eyebrow em { color: var(--text-muted, #6f8cab); font-style: normal; }
+  h1 {
+    margin: 26px 0 0;
+    font-family: var(--font-display, "Segoe UI", sans-serif);
+    font-size: 118px;
+    font-weight: 600;
+    line-height: 0.86;
+    letter-spacing: -0.055em;
+  }
+  h1 .flow {
+    background: linear-gradient(180deg, #d4f4ff 0%, #8fe0ff 46%, #55ceff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .sub {
+    margin: 30px 0 0;
+    max-width: 540px;
+    font-family: var(--font-display, "Segoe UI", sans-serif);
+    font-size: 26px;
+    font-weight: 500;
+    line-height: 1.32;
+    letter-spacing: -0.018em;
+    color: var(--text, #e8f0fe);
+    text-wrap: balance;
+  }
+  .desc {
+    margin: 18px 0 0;
+    max-width: 510px;
+    font-size: 15px;
+    line-height: 1.68;
+    color: var(--text-secondary, #94b4d4);
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 26px; }
+  .tag {
+    padding: 7px 9px;
+    border: 1px solid var(--border, #1b3a5c);
+    border-radius: 6px;
+    background: rgba(10, 24, 40, 0.55);
+    color: var(--text-secondary, #94b4d4);
+    font-family: var(--font-mono, monospace);
+    font-size: 10px;
+    letter-spacing: 0.03em;
+    line-height: 1;
+  }
+  .actions { display: flex; align-items: center; gap: 12px; margin-top: 34px; }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    height: 46px;
+    padding: 0 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: -0.005em;
+    transition: background 150ms linear, border-color 150ms linear, color 150ms linear;
+  }
+  .btn svg { width: 15px; height: 15px; }
+  .btn--primary {
+    background: linear-gradient(180deg, var(--accent, #2c77c6), #23629f);
+    color: #fff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18), 0 0 28px rgba(44, 119, 198, 0.38);
+  }
+  .btn--primary:hover { background: linear-gradient(180deg, #3585d8, #2a6fba); }
+  .btn--ghost {
+    border: 1px solid var(--border, #1b3a5c);
+    background: var(--surface, rgba(17, 34, 54, 0.88));
+    color: var(--text-secondary, #94b4d4);
+  }
+  .btn--ghost:hover { border-color: rgba(85, 206, 255, 0.35); color: var(--text, #e8f0fe); }
+  .link {
+    margin-left: 4px;
+    color: var(--celeste, #55ceff);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+    letter-spacing: 0.01em;
+  }
+  .link:hover { color: #b9f0ff; }
+  .note {
+    margin-top: 22px;
+    font-size: 10px;
+    color: var(--text-muted, #6f8cab);
+    letter-spacing: 0.02em;
+  }
+  .visual { position: absolute; right: 72px; top: 166px; width: 640px; }
+  .shot {
+    position: relative;
+    width: 640px;
+    height: 480px;
+    border: 1px solid var(--border-strong, #2a567f);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #091522;
+    box-shadow: 0 48px 90px -38px rgba(0, 0, 0, 0.95), 0 0 90px -40px rgba(85, 206, 255, 0.45);
+  }
+  .shot img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 9px;
+    border: 1px solid rgba(85, 206, 255, 0.35);
+    border-radius: 999px;
+    background: rgba(7, 18, 32, 0.78);
+    backdrop-filter: blur(8px);
+    color: var(--celeste, #55ceff);
+    font-family: var(--font-mono, monospace);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .badge i { width: 5px; height: 5px; border-radius: 50%; background: var(--celeste, #55ceff); }
+  .caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-top: 16px;
+    font-size: 11px;
+    color: var(--text-muted, #6f8cab);
+  }
+  .caption b { color: var(--text, #e8f0fe); font-weight: 600; }
+  .swatches {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 7px;
+    margin-top: 18px;
+  }
+  .sw { display: flex; flex-direction: column; gap: 7px; text-decoration: none; }
+  .sw i {
+    display: block;
+    height: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 5px;
+  }
+  .sw span {
+    font-size: 9px;
+    letter-spacing: 0.02em;
+    color: var(--text-muted, #6f8cab);
+  }
+  .sw:hover i { border-color: var(--celeste, #55ceff); }
+  .sw:hover span { color: var(--celeste, #55ceff); }
+  .sw--dark i { background: linear-gradient(90deg, #091522, #1b3a5c); }
+  .sw--light i { background: linear-gradient(90deg, #e7f2fd, #bfe4fb); }
+  .sw--graduation i { background: linear-gradient(90deg, #ff7ab8, #8fa6f2); }
+  .sw--ozzy i { background: linear-gradient(90deg, #0b0a0a, #920703 60%, #fbe500); }
+  .sw--lana i { background: linear-gradient(90deg, #fff8f8, #c81d3b); }
+  .sw--acai i { background: linear-gradient(90deg, #14001c, #7e22ce 70%, #fbbf24); }
+  .sw--vaporwave i { background: linear-gradient(90deg, #1e182e, #ff4a8d 60%, #00eefc); }
+  .sw--alien i { background: linear-gradient(90deg, #111413, #00ff66); }
+  .sw--wolverine i { background: linear-gradient(90deg, #faf8ff, #f5ba13 60%, #3b5e9a); }
+  .sw--flowerboy i { background: linear-gradient(90deg, #ffeadf, #f59e0b 60%, #3b6934); }
+  .sw--natal i { background: linear-gradient(90deg, #f4fcf7, #286b41 60%, #c41e3a); }
+  .sw--leila i { background: linear-gradient(90deg, #f7f9ff, #fea619); }
+  .themes-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin-top: 14px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary, #94b4d4);
+    text-decoration: none;
+  }
+  .themes-link:hover { color: var(--celeste, #55ceff); }
+  .foot {
+    position: absolute;
+    left: 72px;
+    right: 72px;
+    bottom: 34px;
+    display: flex;
+    justify-content: space-between;
+    padding-top: 14px;
+    border-top: 1px solid rgba(27, 58, 92, 0.55);
+    color: var(--text-muted, #6f8cab);
+    font-family: var(--font-mono, monospace);
+    font-size: 9px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+</style>
+</helmet>
+
+<div class="case">
+  <div class="stars" aria-hidden="true"></div>
+  <div class="stars--fine" aria-hidden="true"></div>
+  <div class="orbit" aria-hidden="true"></div>
+  <div class="orbit orbit--dash" aria-hidden="true"></div>
+
+  <div class="head">
+    <div class="brand">
+      <img src="/_blob/3b34d8e114103d9b0b149129ce162e2a" alt="">
+      <b>gutoexplorer <span>· case</span></b>
+    </div>
+    <div class="meta">2026 · Portfólio</div>
+  </div>
+
+  <div class="hero">
+    <div class="eyebrow">
+      <i></i>
+      Case · Ferramenta interna
+      <em>· SAP → Excel</em>
+    </div>
+
+    <h1>Pag<span class="flow">Flow</span></h1>
+
+    <p class="sub">Do extrato bruto do SAP a um Excel pronto para enviar.</p>
+
+    <p class="desc">
+      Um app desktop que reúne layouts diferentes, confere os dados e entrega um
+      único arquivo organizado. A lógica fica; o trabalho repetitivo, não.
+    </p>
+
+    <div class="tags">
+      <span class="tag">PyQt6</span>
+      <span class="tag">Python 3.10+</span>
+      <span class="tag">Desktop</span>
+      <span class="tag">6 temas base</span>
+      <span class="tag">+10 secretos</span>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn--primary" href="Macro.dc.html">
+        Visão gerencial
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12h16M13 5l7 7-7 7"/></svg>
+      </a>
+      <a class="btn btn--ghost" href="Micro.dc.html">
+        Visão técnica
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 9l-4 3 4 3M16 9l4 3-4 3"/></svg>
+      </a>
+      <a class="link" href="App.dc.html">Abrir o app →</a>
+    </div>
+
+    <p class="note">Interface recriada em HTML · os controles são uma simulação visual. A réplica completa — configurações, revisão de envio e os doze temas — está em <code style="font-family:'JetBrains Mono',monospace;color:#9cc7ff">pagflow/index.html</code>.</p>
+  </div>
+
+  <div class="visual">
+    <div class="shot">
+      <img src="/_blob/8bdc82e386408329475ec344619790ab" alt="Tela do PagFlow no tema escuro oficial: formulário de consolidação em cinco etapas sobre um céu estrelado.">
+      <span class="badge"><i></i>Oficial · Escuro</span>
+    </div>
+
+    <div class="caption">
+      <span><b>PagFlow</b> — consolidação de pagamentos SAP</span>
+      <span>4:3 · 1280 × 960</span>
+    </div>
+
+    <div class="swatches">
+      <a class="sw sw--dark" href="App.dc.html#dark" title="Abrir no tema Escuro"><i></i><span>Escuro</span></a>
+      <a class="sw sw--light" href="App.dc.html#light" title="Abrir no tema Claro"><i></i><span>Claro</span></a>
+      <a class="sw sw--graduation" href="App.dc.html#graduation" title="Abrir no tema Graduation"><i></i><span>Graduation</span></a>
+      <a class="sw sw--ozzy" href="App.dc.html#ozzy" title="Abrir no tema Ozzy"><i></i><span>Ozzy</span></a>
+      <a class="sw sw--lana" href="App.dc.html#lana" title="Abrir no tema Lana Del Rey"><i></i><span>Lana Del Rey</span></a>
+      <a class="sw sw--acai" href="App.dc.html#acai" title="Abrir no tema Açaí"><i></i><span>Açaí</span></a>
+      <a class="sw sw--vaporwave" href="App.dc.html#vaporwave" title="Abrir no tema Vaporwave"><i></i><span>Vaporwave</span></a>
+      <a class="sw sw--alien" href="App.dc.html#alien" title="Abrir no tema Alien"><i></i><span>Alien</span></a>
+      <a class="sw sw--wolverine" href="App.dc.html#wolverine" title="Abrir no tema Wolverine"><i></i><span>Wolverine</span></a>
+      <a class="sw sw--flowerboy" href="App.dc.html#flowerboy" title="Abrir no tema Flower Boy"><i></i><span>Flower Boy</span></a>
+      <a class="sw sw--natal" href="App.dc.html#natal" title="Abrir no tema Natal"><i></i><span>Natal</span></a>
+      <a class="sw sw--leila" href="App.dc.html#leila" title="Abrir no tema Leila"><i></i><span>Leila</span></a>
+    </div>
+
+    <a class="themes-link" href="Temas.dc.html">Ver os doze temas em tamanho real →</a>
+  </div>
+
+  <div class="foot">
+    <span>01 / 04 — Visão geral</span>
+    <span>PagFlow · case de produto · 2026</span>
+  </div>
+</div>
+</x-dc>
+
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1024}}'>
+class Component extends DCLogic {
+  renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

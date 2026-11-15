@@ -1,0 +1,77 @@
+{
+  "v": 3,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-13T02:35:00Z"
+  },
+  "title": "PagFlow — case",
+  "launch": {
+    "view": "canvas"
+  },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {
+      "x": 0,
+      "y": 0,
+      "w": 1440,
+      "h": 1024,
+      "title": "Visão geral",
+      "is_interactive": true
+    },
+    "Macro.dc.html": {
+      "x": 1520,
+      "y": 0,
+      "w": 1440,
+      "h": 1024,
+      "title": "Visão gerencial"
+    },
+    "Micro.dc.html": {
+      "x": 3040,
+      "y": 0,
+      "w": 1440,
+      "h": 1024,
+      "title": "Visão técnica"
+    },
+    "Temas.dc.html": {
+      "x": 0,
+      "y": 1144,
+      "w": 1440,
+      "h": 1400,
+      "title": "Doze temas",
+      "is_interactive": true
+    },
+    "App.dc.html": {
+      "x": 1520,
+      "y": 1144,
+      "w": 1280,
+      "h": 1064,
+      "title": "App interativo",
+      "is_interactive": true
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "Macro.dc.html",
+    "Micro.dc.html",
+    "Temas.dc.html",
+    "App.dc.html"
+  ],
+  "notes": {
+    "case-title": {
+      "x": 0,
+      "y": -300,
+      "text": "PagFlow — duas leituras, doze temas",
+      "kind": "title1",
+      "maxW": 4480
+    }
+  },
+  "designSystems": [
+    {
+      "title": "gutoexplorer",
+      "namespace": "guto-design-system",
+      "artifact": "designs/guto-design-system",
+      "version": null,
+      "copiedAt": "2026-11-13T02:35:00Z"
+    }
+  ]
+}

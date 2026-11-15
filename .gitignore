@@ -1,0 +1,22 @@
+# Capturas geradas pelos scripts de tools/ (regeradas com `python tools/shot.py`,
+# `python tools/site_shots.py`, `python tools/qa.py`, `python tools/fit.py` etc.)
+tools/shots/
+
+# Estado local dos editores de design (baoyu-design): servidor, histórico e compartilhamento.
+# Os canvases em designs/*/project/ são versionados; isto é só o que roda nesta máquina.
+.artifact-server.json
+.artifact-server.log
+.sharing.json
+history/
+.*.tmp
+
+# Sistema
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
