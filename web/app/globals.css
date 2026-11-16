@@ -2929,16 +2929,6 @@ button {
   opacity: 1;
 }
 
-.hero__coord {
-  position: absolute;
-  right: 2px;
-  bottom: 6px;
-  color: #5f7d9c;
-  font-family: var(--font-mono);
-  font-size: 9px;
-  letter-spacing: 0.14em;
-}
-
 /* Títulos e cartões ------------------------------------------------------ */
 .section-head h2,
 .projects__intro h2,
@@ -3119,10 +3109,6 @@ button {
     aspect-ratio: 1;
   }
 
-  .hero__coord {
-    display: none;
-  }
-
   .hero__visual::before {
     width: 420px;
     height: 420px;
@@ -3277,6 +3263,19 @@ button {
 /* Retrato alinhado ao topo da headline (como na prancha A) ---------------- */
 .hero__visual {
   place-items: start center;
+}
+
+/* Em telas altas o hero não precisa esticar até o fim da janela: a seção
+   Sobre encosta logo abaixo, sem deixar um vão grande antes do título. */
+@media (min-width: 901px) {
+  .hero {
+    min-height: auto;
+    padding-bottom: clamp(32px, 4vh, 48px);
+  }
+}
+
+.hero + .section {
+  padding-top: clamp(48px, 5vw, 80px);
 }
 
 /* Contato: headline em duas linhas, sem a palavra órfã ------------------- */

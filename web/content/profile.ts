@@ -11,7 +11,6 @@ export const brand = {
   tagline: "Análise de dados · Processos · Automação",
   year: 2026,
   location: "Cajamar, SP · Brasil",
-  coordinates: "23°34′ S / 46°51′ W",
   email: "gustavo.pinheirodev997@gmail.com",
 } as const;
 

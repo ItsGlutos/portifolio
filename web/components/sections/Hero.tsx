@@ -115,10 +115,6 @@ export function Hero() {
               <span className="portrait__glare" aria-hidden="true" />
             </figure>
           </PortraitTilt>
-
-          <span className="hero__coord" aria-hidden="true" data-parallax="0.22">
-            {brand.coordinates}
-          </span>
         </div>
       </div>
     </section>
