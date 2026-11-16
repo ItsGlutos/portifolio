@@ -99,7 +99,7 @@ A réplica é uma janela 1280 × 960; a 390 px ela cai para 27% (medido:
 - `<dialog>` nativo ao tocar em “Abrir o app interativo” no celular (foco preso,
   `Esc`, clique no backdrop, foco devolvido ao CTA). No desktop o link continua
   abrindo direto em nova aba;
-- aviso destacado no topo da própria réplica (`pagflow/index.html`) em telas de
+- aviso destacado no topo da própria réplica (`web/public/pagflow/index.html`) em telas de
   até 900 px, e cabeçalho da réplica reorganizado em duas linhas no celular.
 
 ### Deploy

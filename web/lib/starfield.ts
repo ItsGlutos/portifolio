@@ -1,5 +1,5 @@
 /**
- * Céu estrelado em Canvas 2D — port fiel de `assets/js/stars.js`.
+ * Céu estrelado em Canvas 2D — lógica portada do site HTML original.
  * Lógica pura, sem React: o componente só liga ao ciclo de vida.
  *
  * - semente determinística (20261104): o céu é sempre o mesmo lugar

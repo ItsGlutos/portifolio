@@ -1,6 +1,6 @@
 # gutoexplorer — versão React
 
-Reimplementação do site em **Next.js 16 (App Router) + React 19 + TypeScript**, com export estático. É o site novo; a versão HTML original continua na raiz do repositório como referência de paridade (`index.html` + `assets/`).
+Site do **gutoexplorer** em **Next.js 16 (App Router) + React 19 + TypeScript**, com export estático. É a única versão do site: o repositório não mantém mais a implementação antiga em HTML.
 
 ## Rodar
 
@@ -73,18 +73,6 @@ vercel.json             headers, cache e trailingSlash do deploy real
 DEPLOY.md               passo a passo de GitHub Pages (prévia) e Vercel (produção)
 ```
 
-## Paridade com o site original
-
-Comparação automatizada (`tools/compare_shots.py`) entre `index.html` e o export:
-
-| Viewport | Altura da página | Pixels diferentes |
-| --- | --- | --- |
-| 1440×900 | 5832 px (idêntica) | 0,018% |
-| 834×1112 | 7192 px (idêntica) | 0,025% |
-| 390×844 | 8753 px (idêntica) | 0,069% |
-
-A diferença está concentrada no rodapé, onde o texto mudou de propósito (“portfólio v2.0”, “Feito com React, Next.js…”).
-
 ## Mobile
 
 A versão mobile foi revisada para parecer intencional, não um desktop encolhido:
@@ -119,7 +107,6 @@ Com o export servido (`python tools/serve_out.py 4300`, a partir da raiz):
 python tools/qa_next.py        # filtro, contagens, menu, Esc/foco/inert, âncoras, reduced motion, metas
 python tools/a11y_next.py      # axe-core (WCAG 2.1 AA + best practices) na home e no PagFlow
 python tools/vitals_next.py    # FCP, LCP, CLS, TBT e peso transferido
-python tools/compare_shots.py  # capturas legado x React + console
 ```
 
 Resultado atual: QA 30/30, axe sem violação grave/crítica, LCP 580 ms (desktop) / 420 ms (mobile) em localhost, CLS ≈ 0, TBT 49 ms / 22 ms.
