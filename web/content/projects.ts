@@ -111,7 +111,7 @@ export const projects: readonly Project[] = [
     kicker: "Qualidade · Indicadores logísticos",
     title: "Gestão de KPI",
     description:
-      "Resultados abaixo da meta motivaram uma investigação, não uma conclusão. Ouvi as transportadoras com os menores indicadores, entendi as condições das rotas e levei a contestação dos valores, tratativa interna e maior cautela e limpeza nos dados.",
+      "Tratamento e controle de indicadores de medição de qualidade operacional entre transportadores, cálculos automatizados com Python e visualização completa em Dashboards PBI.",
     tags: ["Análise de indicadores", "Logística", "Colaboração"],
     year: "2026",
     categories: ["dados"],
@@ -122,11 +122,11 @@ export const projects: readonly Project[] = [
   {
     kind: "standard",
     slug: "rotina-financeira",
-    kicker: "Processos",
+    kicker: "Pagamentos",
     title: "Rotina Financeira",
     description:
       "Otimização de fluxos financeiros com automações de apoio à equipe. O trabalho envolveu entender a rotina, simplificar etapas e reduzir o esforço manual para que o time tivesse mais tempo de acompanhar e analisar o que importava.",
-    tags: ["Automação", "Processos", "Suporte à equipe"],
+    tags: ["Automação", "Processos", "Suporte à equipe", "Pagamentos"],
     year: "2024–2026",
     categories: ["automacao"],
     art: "automation",

@@ -60,7 +60,7 @@ export function About() {
             </p>
             <p>
               Antes dos dados, desenvolvi jogos 2D na Unity. Depois, minha trajetória
-              passou por operações e rotinas administrativas; contextos
+              passou por rotinas financeiras e administrativas; contextos
               em que vi de perto o custo do trabalho manual e a distância entre um sistema
               e as pessoas que precisam usá-lo. Hoje atuo em uma frente que me possibilita
               acompanhar e melhorar indicadores logísticos de transporte, investigando
