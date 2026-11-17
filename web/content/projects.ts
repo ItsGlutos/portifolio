@@ -15,10 +15,19 @@ type BaseProject = {
   categories: readonly Category[];
 };
 
-export type ShowcaseProject = BaseProject & {
+/** Leitura do PagFlow: o mesmo case em duas profundidades. */
+export type ProjectView = {
+  label: string;
+  description: string;
+  tags: readonly string[];
+};
+
+export type ShowcaseProject = Omit<BaseProject, "description" | "tags"> & {
   kind: "showcase";
   cta: { label: string; href: string; external: boolean };
   meta: string;
+  /** Gerencial vem primeiro: é a porta de entrada de quem não é técnico. */
+  views: { managerial: ProjectView; technical: ProjectView };
 };
 
 export type ReadingProject = BaseProject & {
@@ -43,9 +52,20 @@ export const projects: readonly Project[] = [
     slug: "pagflow",
     kicker: "Automação · Case em destaque",
     title: "PagFlow",
-    description:
-      "Um app desktop que consolida diversas faturas em um único relatório. Foi desenhado para ser usado por quem não programa: processamento local, sem coleta externa e uma interface ajustada a partir do feedback de usuários reais. A versão interativa replica a experiência completa, sem operar arquivos.",
-    tags: ["Python", "UX", "Privacidade", "Automação"],
+    views: {
+      managerial: {
+        label: "Gerencial",
+        description:
+          "Uma ferramenta de desktop que elimina a montagem manual de relatórios: lê os extratos de pagamento do SAP, consolida tudo em uma planilha única e deixa o envio por e-mail pronto em um clique. Foi desenhada para quem não programa e ajustada com o feedback de quem usa a rotina. Todo o processamento acontece na máquina — nenhum arquivo sai para servidores externos.",
+        tags: ["Automação", "Produto", "Adoção", "Privacidade"],
+      },
+      technical: {
+        label: "Técnica",
+        description:
+          "App desktop em Python/PyQt6. Lê os extratos FBL1N e REL_LOG do SAP, cruza com a planilha de contatos das transportadoras, consolida e formata o .xlsx; o envio usa o Outlook Desktop local, com anexos e blocos condicionais por tipo de documento. Arquitetura local, sem backend, telemetria ou persistência de dados do usuário. A demo no navegador é uma réplica visual em HTML/CSS/JS: simula a interface, não processa arquivos.",
+        tags: ["Python", "PyQt6", "SAP", "Outlook"],
+      },
+    },
     year: "2026",
     categories: ["automacao"],
     cta: {

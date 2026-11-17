@@ -72,6 +72,8 @@ tools/
 
 O PagFlow é um app desktop em PyQt6 que consolida extratos de pagamento do SAP em um único `.xlsx`. No site ele aparece em dois lugares: no cartão em destaque da home e na réplica interativa em `/pagflow/`.
 
+O cartão traz **duas leituras** do mesmo case, escolhidas por abas: **Gerencial** (padrão), para recrutadores e quem não é técnico, e **Técnica**, para desenvolvedores e analistas. A troca muda texto e tags no próprio cartão, sem sair da home; a última escolha fica em `localStorage` (`pagflow:view`) e os dois textos permanecem no HTML — o inativo só é escondido visualmente, para SEO e para a altura não pular. A copy das duas visões vive em `views`, em `web/content/projects.ts`.
+
 A réplica é a interface inteira em HTML, CSS e canvas, no tamanho real da janela (1280 × 960, escalada para caber), com as duas telas (**Gerar Excel** e **Envio de e-mails**), os **doze temas** (Escuro, Claro, Graduation, Ozzy, Lana Del Rey, Açaí, Vaporwave, Alien, Wolverine, Flower Boy, Natal e Leila), as **Configurações** com cinco abas e desbloqueio por código, a **revisão de envio** e as caixas de mensagem do app.
 
 Nada operacional funciona: nenhum arquivo é lido, gerado ou enviado. Os botões de pasta preenchem caminhos de exemplo, “Gerar Excel” simula o processamento e “Preparar envios” abre a revisão com dados de demonstração. O par corporativo **GrupoSC** ficou de fora.

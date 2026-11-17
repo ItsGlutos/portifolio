@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/icons";
 import { ReadingArt, StandardArt } from "./ProjectArt";
 import { PagflowCta } from "./PagflowCta";
+import { PagflowViews } from "./PagflowViews";
 
 type ProjectCardProps = {
   project: Project;
@@ -90,8 +91,7 @@ export function ProjectCard({ project, number, delay, instant = false }: Project
         <div className="project__body">
           <p className="project__kicker">{project.kicker}</p>
           <h3>{project.title}</h3>
-          <p className="project__desc">{project.description}</p>
-          <Tags tags={project.tags} />
+          <PagflowViews views={project.views} />
           <PagflowCta href={project.cta.href} label={project.cta.label} />
           <p className="project__meta">
             <span>{project.meta}</span>

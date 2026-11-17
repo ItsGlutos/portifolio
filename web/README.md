@@ -24,6 +24,7 @@ npm run lint         # oxlint
 ## O que mudou de verdade
 
 - **Conteúdo tipado.** Projetos, contatos, fatos e ferramentas vivem em `content/`, com tipos discriminados. Os contadores do filtro (`05/03/02`) passaram a ser derivados do array — não existe mais número digitado à mão que possa divergir dos cartões.
+- **Duas leituras do PagFlow.** O cartão em destaque alterna entre a explicação **gerencial** (padrão, para recrutadores e público não técnico) e a **técnica**, trocando também as tags. A troca usa abas ARIA com setas/Home/End, lembra a escolha em `localStorage` e mantém os dois textos no HTML; os painéis dividem a mesma célula de grid, então a altura do cartão não pula.
 - **Componentes com estado no React.** Filtro, menu, céu, ímã, tilt e spotlight são componentes/hooks; o `site.js` global de 295 linhas não existe mais.
 - **React Bits no que se move.** O ímã dos CTAs é o **Magnet** oficial (física de mola, `maxOffset`, respeito a toque e reduced motion) e o CTA do header usa **StarBorder** com `hover="reveal"`: em repouso o contorno fica limpo, a estrela só percorre a borda quando o ponteiro chega perto. Os dois foram copiados como código-fonte (variantes TS sem Tailwind), sem dependência nova.
 - **Estrela cadente.** O céu ganhou uma passagem rara: um dos ✦ se desgarra, atravessa o céu em ~0,7 s e some. A frequência é controlada em `lib/starfield.ts` (`METEOR_FIRST`, `METEOR_GAP`, `METEOR_PAIR_CHANCE`): a primeira vem depois de 8–13 s, as seguintes esperam 34–76 s, e em 18% das vezes uma segunda passa logo atrás. Com reduced motion, nenhuma passa.
@@ -59,7 +60,7 @@ app/
 components/
   layout/               Header (+ menu mobile), Footer, ScrollProgress
   sections/             Hero, About, Projects, Contact
-  projects/             ProjectsBrowser (filtro), ProjectCard, ProjectArt, PagflowCta (aviso mobile)
+  projects/             ProjectsBrowser (filtro), ProjectCard, ProjectArt, PagflowViews (visões), PagflowCta (aviso mobile)
   ui/                   ícones, MagneticLink (compõe o Magnet), PortraitTilt, SectionLabel
   reactbits/            Magnet (React Bits) · StarBorder + CSS (React Bits)
   sky/                  SkyCanvas
