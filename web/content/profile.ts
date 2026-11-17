@@ -70,7 +70,6 @@ export const toolbox = [
   "Excel avançado",
   "Power Query",
   "ETL",
-  "C#",
   "Modelagem de dados",
   "PowerPoint",
   "LGPD",

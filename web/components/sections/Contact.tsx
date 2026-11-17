@@ -18,7 +18,7 @@ export function Contact() {
           <h2 id="contato-title">
             Tem um desafio?
             <br />
-            <em>Vamos olhar os dados juntos.</em>
+            <em>Eu aceito.</em>
           </h2>
           <p>
             Estou aberto a conversas sobre análise de dados, melhoria de processos,

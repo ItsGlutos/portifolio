@@ -59,7 +59,8 @@ export function About() {
               rotina e identificar onde a informação se perde.
             </p>
             <p>
-              Minha trajetória passou por operações e rotinas administrativas; contextos
+              Antes dos dados, desenvolvi jogos 2D na Unity. Depois, minha trajetória
+              passou por operações e rotinas administrativas; contextos
               em que vi de perto o custo do trabalho manual e a distância entre um sistema
               e as pessoas que precisam usá-lo. Hoje atuo em uma frente que me possibilita
               acompanhar e melhorar indicadores logísticos de transporte, investigando
