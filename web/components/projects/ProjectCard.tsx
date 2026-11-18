@@ -1,9 +1,7 @@
-import { useEffect, useState, type CSSProperties, type PointerEvent } from "react";
+import type { CSSProperties, PointerEvent } from "react";
 import type { Project } from "@/content/projects";
 import { padIndex } from "@/content/projects";
 import { asset } from "@/lib/asset";
-import { cn } from "@/lib/cn";
-import { useInView } from "@/lib/useInView";
 import {
   ArrowRight,
   ClockIcon,
@@ -18,8 +16,6 @@ type ProjectCardProps = {
   project: Project;
   number: number;
   delay: number;
-  /** Cartão criado por uma troca de filtro: entra visível, sem esperar observer. */
-  instant?: boolean;
 };
 
 /** Spotlight: a luz do cartão acompanha o ponteiro via CSS vars. */
@@ -49,24 +45,13 @@ function Tags({ tags }: { tags: readonly string[] }) {
   );
 }
 
-export function ProjectCard({ project, number, delay, instant = false }: ProjectCardProps) {
+export function ProjectCard({ project, number, delay }: ProjectCardProps) {
   const style = cardStyle(delay);
-  const { ref, inView } = useInView<HTMLElement>({ initial: instant });
-
-  /* Depois que o filtro é usado, todo resultado aparece na hora: a troca de
-     layout dentro da View Transition não dispara o IntersectionObserver. */
-  const [forced, setForced] = useState(instant);
-  useEffect(() => {
-    if (instant) setForced(true);
-  }, [instant]);
-
-  const visible = inView || forced;
 
   if (project.kind === "showcase") {
     return (
       <article
-        ref={ref}
-        className={cn("project project--wide project--showcase", visible && "is-visible")}
+        className="project project--wide project--showcase"
         data-category={project.categories.join(" ")}
         data-reveal=""
         style={style}
@@ -105,8 +90,7 @@ export function ProjectCard({ project, number, delay, instant = false }: Project
   if (project.kind === "reading") {
     return (
       <article
-        ref={ref}
-        className={cn("project project--reading", visible && "is-visible")}
+        className="project project--reading"
         data-category={project.categories.join(" ")}
         data-reveal=""
         style={style}
@@ -148,8 +132,7 @@ export function ProjectCard({ project, number, delay, instant = false }: Project
 
   return (
     <article
-      ref={ref}
-      className={cn("project", visible && "is-visible")}
+      className="project"
       data-category={project.categories.join(" ")}
       data-reveal=""
       style={style}

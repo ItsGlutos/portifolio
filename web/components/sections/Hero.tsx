@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { brand, heroMeta } from "@/content/profile";
 import { asset } from "@/lib/asset";
 import { ArrowDown, ArrowUpRight, BarsIcon, ChartLineIcon, CubeIcon } from "@/components/ui/icons";
@@ -11,18 +12,16 @@ const metaIcons = {
 } as const;
 
 /**
- * O hero fica **fora** do reveal de propósito.
- *
- * Antes ele nascia com `opacity: 0` esperando a hidratação: em rede móvel isso
- * entregava um título solto num vazio por dezenas de segundos. Aqui o texto
- * aparece no primeiro paint; a única entrada é a do próprio título, em CSS.
+ * O hero entra animado, mas **sem esperar hidratação**: a entrada usa
+ * `@starting-style` (CSS puro), então o texto é pintado e animado na primeira
+ * tela mesmo se o JS demorar. O título tem a animação própria de linha a linha.
  */
 export function Hero() {
   return (
     <section className="hero" id="inicio" aria-labelledby="hero-title">
       <div className="container hero__grid">
         <div className="hero__copy">
-          <p className="hero__eyebrow">
+          <p className="hero__eyebrow" data-reveal>
             <span className="dot dot--success" aria-hidden="true" />
             <span>{brand.role}</span>
             <span className="sep" aria-hidden="true" />
@@ -43,13 +42,17 @@ export function Hero() {
             </span>
           </h1>
 
-          <p className="hero__lead">
+          <p className="hero__lead" data-reveal style={{ "--reveal-delay": 2 } as CSSProperties}>
             Sou profissional de dados, com perfil analítico. Investigo indicadores,
             compreendo processos e uso <strong>automação e programação</strong> para
             devolver tempo às equipes e apoiar decisões melhores.
           </p>
 
-          <div className="hero__actions">
+          <div
+            className="hero__actions"
+            data-reveal
+            style={{ "--reveal-delay": 3 } as CSSProperties}
+          >
             <MagneticLink className="btn btn--primary btn--lg" href="#projetos">
               Explorar projetos
               <ArrowDown />
@@ -60,7 +63,7 @@ export function Hero() {
             </MagneticLink>
           </div>
 
-          <p className="hero__meta">
+          <p className="hero__meta" data-reveal style={{ "--reveal-delay": 4 } as CSSProperties}>
             {heroMeta.map((item) => {
               const Icon = metaIcons[item.icon];
               return (
@@ -73,7 +76,11 @@ export function Hero() {
           </p>
         </div>
 
-        <div className="hero__visual">
+        <div
+          className="hero__visual"
+          data-reveal
+          style={{ "--reveal-delay": 2 } as CSSProperties}
+        >
           <div className="orbit orbit--1" aria-hidden="true">
             <span className="orbit__node" />
           </div>

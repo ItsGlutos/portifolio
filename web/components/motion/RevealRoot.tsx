@@ -5,22 +5,21 @@ import { useEffect } from "react";
 /**
  * Revelação no scroll.
  *
- * O HTML estático chega **visível**: nada de `opacity: 0` esperando a
- * hidratação. Numa rede móvel lenta o JS pode levar dezenas de segundos, e a
- * versão anterior entregava, nesse intervalo, um título solto num vazio.
+ * O HTML estático chega visível e a entrada da primeira tela é feita em CSS
+ * (`@starting-style`), então nada fica esperando a hidratação — nem a animação,
+ * nem o conteúdo. O JS só esconde o que está fora da dobra (`.is-pending`) e
+ * devolve quando o elemento entra na tela, com transição.
  *
- * Agora só o que está fora da primeira tela é escondido — e isso é aplicado no
- * mount (`.is-pending`), quando o bloco abaixo da dobra não pode ser visto
- * mesmo. Quem já está na tela nasce revelado.
- *
- * Dois detalhes que o site estático não tinha:
- * 1. nós inseridos depois (filtro de projetos) são revelados por
- *    MutationObserver — sem isso eles nasceriam invisíveis;
- * 2. com `prefers-reduced-motion: reduce` nada é escondido.
+ * Conteúdo montado depois (filtro de projetos) nasce escondido e entra animado;
+ * a classe é escrita no DOM, não controlada pelo React, para re-render não
+ * apagar o estado da revelação.
  */
 
-/** Acima desta fração da tela o bloco já entra visível. */
+/** Acima desta fração da tela o bloco ainda é considerado "fora da dobra". */
 const HIDE_AFTER_VIEWPORT = 0.92;
+
+/** Evento disparado por quem troca conteúdo na tela (filtro, rotas). */
+export const REVEAL_REFRESH_EVENT = "reveal:refresh";
 
 export function RevealRoot() {
   useEffect(() => {
@@ -37,50 +36,50 @@ export function RevealRoot() {
     };
     const revealAll = () => targets().forEach(reveal);
 
-    let observer: IntersectionObserver | undefined;
-    let safety = 0;
-
     if (media.matches || !supportsIO) {
       revealAll();
-    } else {
-      const limit = window.innerHeight * HIDE_AFTER_VIEWPORT;
-
-      for (const element of targets()) {
-        if (element.getBoundingClientRect().top > limit) {
-          element.classList.add("is-pending");
-        } else {
-          element.classList.add("is-visible");
-        }
-      }
-
-      observer = new IntersectionObserver(
-        (entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            reveal(entry.target as HTMLElement);
-            observer?.unobserve(entry.target);
-          }
-        },
-        { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
-      );
-
-      targets()
-        .filter((element) => element.classList.contains("is-pending"))
-        .forEach((element) => observer?.observe(element));
-
-      /* Rede de segurança: se o observer não disparar (aba em segundo plano,
-         IO interrompido), o que já está na tela aparece. */
-      safety = window.setTimeout(() => {
-        const height = window.innerHeight;
-        for (const element of targets()) {
-          if (!element.classList.contains("is-pending")) continue;
-          const rect = element.getBoundingClientRect();
-          if (rect.top < height && rect.bottom > 0) reveal(element);
-        }
-      }, 2200);
+      return;
     }
 
-    /* Conteúdo montado depois (filtro, rotas): revela, sempre. */
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          reveal(entry.target as HTMLElement);
+          observer.unobserve(entry.target);
+        }
+      },
+      { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
+    );
+
+    /* Esconde só o que está abaixo da primeira tela: o que já está visível
+       acabou de animar pela `@starting-style`. */
+    const hideBelowFold = () => {
+      const limit = window.innerHeight * HIDE_AFTER_VIEWPORT;
+      for (const element of targets()) {
+        if (element.classList.contains("is-visible")) continue;
+        if (element.getBoundingClientRect().top > limit) {
+          element.classList.add("is-pending");
+          observer.observe(element);
+        }
+      }
+    };
+
+    hideBelowFold();
+
+    /* Depois de uma troca de conteúdo (filtro), o que passou a estar na tela
+       entra agora — o IntersectionObserver não reavalia durante a transição. */
+    const refresh = () => {
+      const height = window.innerHeight;
+      for (const element of targets()) {
+        if (element.classList.contains("is-visible")) continue;
+        const rect = element.getBoundingClientRect();
+        if (rect.top < height && rect.bottom > 0) reveal(element);
+      }
+    };
+
+    /* Conteúdo novo: nasce escondido e entra animado (ou fica esperando a
+       rolagem, se estiver fora da tela). */
     const mutations = new MutationObserver((records) => {
       for (const record of records) {
         for (const node of record.addedNodes) {
@@ -89,8 +88,14 @@ export function RevealRoot() {
             ? [node]
             : Array.from(node.querySelectorAll<HTMLElement>("[data-reveal]"));
 
-          for (const target of added) {
-            window.requestAnimationFrame(() => reveal(target));
+          for (const element of added) {
+            element.classList.add("is-pending");
+            const rect = element.getBoundingClientRect();
+            if (rect.top < window.innerHeight && rect.bottom > 0) {
+              window.requestAnimationFrame(() => reveal(element));
+            } else {
+              observer.observe(element);
+            }
           }
         }
       }
@@ -98,15 +103,22 @@ export function RevealRoot() {
 
     mutations.observe(document.body, { childList: true, subtree: true });
 
+    /* Rede de segurança: se o observer não disparar (aba em segundo plano),
+       o que já está na tela aparece. */
+    const safety = window.setTimeout(refresh, 2200);
+
     const onMotionChange = () => {
       if (media.matches) revealAll();
     };
+
+    document.addEventListener(REVEAL_REFRESH_EVENT, refresh);
     media.addEventListener("change", onMotionChange);
 
     return () => {
-      observer?.disconnect();
+      observer.disconnect();
       mutations.disconnect();
       window.clearTimeout(safety);
+      document.removeEventListener(REVEAL_REFRESH_EVENT, refresh);
       media.removeEventListener("change", onMotionChange);
     };
   }, []);

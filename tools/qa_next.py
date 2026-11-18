@@ -324,6 +324,48 @@ def test_reduced_motion() -> None:
         d.quit()
 
 
+def test_animations() -> None:
+    """Regressão: reveal e entrada do hero não podem voltar a ficar estáticos."""
+    d = driver()
+    try:
+        d.get(BASE + "/")
+        wait_ready(d)
+        d.execute_script("document.getElementById('projetos').scrollIntoView()")
+        time.sleep(1.2)
+        info = d.execute_script(
+            """
+            const lead = document.querySelector('.hero__lead');
+            const line = document.querySelector('.hero__title .line > span');
+            const cards = [...document.querySelectorAll('.project')];
+            return {
+              leadTransition: getComputedStyle(lead).transitionDuration,
+              heroAnimation: getComputedStyle(line).animationName,
+              cardsWithReveal: cards.filter(c => c.hasAttribute('data-reveal')).length,
+              cards: cards.length,
+              pendingOnLoad: cards.some(c => c.classList.contains('is-pending'))
+            };
+            """
+        )
+        check(
+            "reveal tem transição ativa",
+            info["leadTransition"] not in ("0s", "0.00001s", ""),
+            info["leadTransition"],
+        )
+        check(
+            "título do hero anima linha a linha",
+            info["heroAnimation"] == "hero-line",
+            info["heroAnimation"],
+        )
+        check(
+            "cartões participam do reveal",
+            info["cards"] > 0 and info["cardsWithReveal"] == info["cards"],
+            f"{info['cardsWithReveal']}/{info['cards']}",
+        )
+        check("sem erro de console", len(severe(d)) == 0, str(severe(d)[:2]))
+    finally:
+        d.quit()
+
+
 def test_meta() -> None:
     d = driver()
     try:
@@ -366,6 +408,8 @@ def main() -> int:
     test_pagflow()
     print("== reduced motion ==")
     test_reduced_motion()
+    print("== animações ==")
+    test_animations()
     print("== metadados ==")
     test_meta()
 

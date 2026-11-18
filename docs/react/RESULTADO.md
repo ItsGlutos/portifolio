@@ -128,3 +128,36 @@ A réplica é uma janela 1280 × 960; a 390 px ela cai para 27% (medido:
   `og.png`, 404 e `/pagflow/` respondendo sob o `basePath`; console limpo.
 - Altura da home: desktop idêntica (5832 px); mobile +90 px (nota e CTA maiores).
 
+
+
+## Atualização — animações de entrada restauradas (18/11/2026)
+
+Depois dos ajustes mobile e da constelação do morcego, as entradas baseadas em
+revelação pararam de animar. Duas causas independentes:
+
+1. **Hero fora do reveal.** A correção de mobile removeu `data-reveal` dos cinco
+   nós do hero e passou a revelar só o que está abaixo da dobra. Resultado: a
+   primeira tela (eyebrow, lead, CTAs, metadados e retrato) aparecia pronta.
+2. **React sobrescrevia o estado da revelação.** `ProjectCard` controlava
+   `is-visible` pelo `className`; ao re-renderizar, apagava o `is-pending`
+   colocado pelo RevealRoot. Sem o par `is-pending → is-pending.is-visible` não
+   havia transição: o cartão surgia de uma vez (e o filtro nunca animava).
+
+Correção:
+
+- `[data-reveal]` voltou a ter transição na base e ganhou `@starting-style`:
+  a entrada da primeira tela é 100% CSS e acontece antes da hidratação — o
+  HTML continua visível, sem o problema de página em branco em rede lenta.
+- `RevealRoot` voltou a esconder (`.is-pending`) só o que está fora da dobra,
+  revela por IntersectionObserver, cobre conteúdo novo por MutationObserver e
+  responde a `reveal:refresh` (disparado pelo filtro) para trazer ao palco o que
+  passou a estar na tela durante a View Transition.
+- `ProjectCard` não mexe mais em `is-visible`; a classe é escrita no DOM.
+- Hero voltou ao reveal (com os atrasos 2/3/4 originais).
+
+Verificação: hero 0 → 0,89 → 1; Sobre 0 → 0,42 → 0,83 → 1; cartões 0 → 0,66 → 1
+com escalonamento; cartão que entra pelo filtro 0 → 0,67 → 0,98 → 1; `hero-line`
+0,95 s; órbitas, flutuação do ícone e pulso do selo intactos; sem JS, 17/17
+blocos visíveis; reduced motion instantâneo; CLS 0; QA 49/49 e axe sem
+violações. `tools/qa_next.py` ganhou a checagem "animações" para travar essa
+regressão.

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import {
   filters,
@@ -10,6 +10,7 @@ import {
   type FilterKey,
 } from "@/content/projects";
 import { useReducedMotion } from "@/lib/useReducedMotion";
+import { REVEAL_REFRESH_EVENT } from "@/components/motion/RevealRoot";
 import { ProjectCard } from "./ProjectCard";
 
 type ViewTransitionDocument = Document & {
@@ -22,7 +23,6 @@ function formatCount(value: number): string {
 
 export function ProjectsBrowser() {
   const [filter, setFilter] = useState<FilterKey>("todos");
-  const [hasFiltered, setHasFiltered] = useState(false);
   const reduced = useReducedMotion();
 
   const visible = useMemo(
@@ -33,10 +33,7 @@ export function ProjectsBrowser() {
   function changeFilter(next: FilterKey) {
     if (next === filter) return;
 
-    const apply = () => {
-      setHasFiltered(true);
-      setFilter(next);
-    };
+    const apply = () => setFilter(next);
     const doc = document as ViewTransitionDocument;
 
     /* View Transition nativa: os cartões entram/saem com continuidade,
@@ -49,6 +46,13 @@ export function ProjectsBrowser() {
     }
     apply();
   }
+
+  /* A grade mudou de altura: avisa a revelação para trazer ao palco o que
+     passou a estar na tela (o IntersectionObserver não reavalia sozinho
+     durante a View Transition). */
+  useEffect(() => {
+    document.dispatchEvent(new Event(REVEAL_REFRESH_EVENT));
+  }, [filter]);
 
   return (
     <>
@@ -104,7 +108,6 @@ export function ProjectsBrowser() {
             project={project}
             number={projects.indexOf(project)}
             delay={position}
-            instant={hasFiltered}
           />
         ))}
       </div>

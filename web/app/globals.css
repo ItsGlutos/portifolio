@@ -2196,14 +2196,30 @@ button {
 }
 
 /* Reveal -----------------------------------------------------------------
-   A classe `.is-pending` é aplicada pelo JS **só** em quem está fora da
-   primeira tela. O HTML estático chega visível: em rede móvel lenta nada fica
-   esperando a hidratação para aparecer. */
+   Duas camadas, nenhuma delas deixando a página invisível esperando JS:
+   1. `@starting-style` faz a entrada da primeira tela só com CSS — o bloco já
+      vem visível no HTML e anima assim que é pintado, antes da hidratação;
+   2. `.is-pending` é aplicada pelo JS **só** em quem está fora da dobra e é
+      devolvida quando o elemento entra na tela. */
+[data-reveal] {
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity 720ms var(--ease-out),
+    translate 720ms var(--ease-out);
+  transition-delay: calc(var(--reveal-delay, 0) * 80ms);
+}
+
+@starting-style {
+  [data-reveal] {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+
 [data-reveal].is-pending {
   opacity: 0;
   translate: 0 18px;
-  transition: opacity 720ms var(--ease-out), translate 720ms var(--ease-out);
-  transition-delay: calc(var(--reveal-delay, 0) * 80ms);
 }
 
 [data-reveal].is-pending.is-visible {
