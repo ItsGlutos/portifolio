@@ -4,10 +4,16 @@ web/out/
 # Capturas geradas pelas auditorias (`python tools/mobile_audit.py`)
 tools/shots/
 
+# Material local de demonstração (capturas, gifs e scripts de apoio)
+demo/
+
 # Sistema
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Logs
+*.log
 
 # Python
 __pycache__/
