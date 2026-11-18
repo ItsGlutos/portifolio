@@ -1213,6 +1213,21 @@ button {
   letter-spacing: 0.02em;
 }
 
+/* Divisor de tópicos ----------------------------------------------------- */
+/* A constelação fecha o Sobre e a hairline é a borda do próprio bloco: com
+   ela, o Projetos não recebe a segunda linha de `.section + .section`. */
+.constellation-divider {
+  padding-block: 0 clamp(48px, 6vw, 96px);
+  border-bottom: 1px solid var(--border-soft);
+}
+
+/* Duas classes: o `width: 100%` de `.bc` (CSS do componente, importado
+   depois) não pode ganhar por ordem de carregamento. */
+.constellation-divider .constellation-divider__bat {
+  width: min(960px, 92%);
+  margin-inline: auto;
+}
+
 /* Projetos --------------------------------------------------------------- */
 .projects__bar {
   display: grid;

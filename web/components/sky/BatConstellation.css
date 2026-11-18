@@ -1,0 +1,210 @@
+/* Constelação do morcego ---------------------------------------------------
+   Tudo dentro de .bc. A entrada depende de .is-live (IntersectionObserver);
+   sem JS ou com movimento reduzido, a figura aparece pronta e parada.
+   ------------------------------------------------------------------------ */
+
+.bc {
+  position: relative;
+  width: 100%;
+  isolation: isolate;
+}
+
+.bc__aura {
+  position: absolute;
+  inset: -12% -7%;
+  border-radius: 50%;
+  background: radial-gradient(
+    46% 40% at 50% 52%,
+    rgba(28, 104, 172, 0.26),
+    rgba(9, 21, 34, 0) 72%
+  );
+  pointer-events: none;
+  opacity: 0.7;
+  animation: bc-aura 16s ease-in-out infinite alternate;
+}
+
+.bc__svg {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+/* Traços ------------------------------------------------------------------ */
+.bc__wire {
+  stroke: var(--bc-line);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  opacity: 0;
+}
+
+.bc__wire--vein {
+  stroke-width: 1.15;
+}
+
+.bc__wire--glow {
+  stroke: #3f9cd8;
+  stroke-width: 10;
+  stroke-linecap: round;
+}
+
+.bc.is-live .bc__wire {
+  animation: bc-wire 1.05s var(--ease-out) both;
+  animation-delay: var(--i);
+}
+
+@keyframes bc-wire {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+  12% {
+    opacity: var(--w-op);
+  }
+  100% {
+    opacity: var(--w-op);
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Pulso que percorre o traço, como luz andando entre estrelas -------------- */
+.bc__pulse {
+  stroke: #eafcff;
+  stroke-width: 2.7;
+  stroke-linecap: round;
+  stroke-dasharray: 0.045 0.955;
+  stroke-dashoffset: 1;
+  opacity: 0;
+  filter: drop-shadow(0 0 4px rgba(85, 206, 255, 0.85));
+}
+
+.bc.is-live .bc__pulse {
+  animation: bc-pulse 3.6s linear infinite;
+  animation-delay: var(--pd);
+}
+
+@keyframes bc-pulse {
+  0% {
+    opacity: 0;
+    stroke-dashoffset: 1;
+  }
+  6% {
+    opacity: 0.9;
+  }
+  30% {
+    opacity: 0.9;
+    stroke-dashoffset: 0;
+  }
+  38%,
+  100% {
+    opacity: 0;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Estrelas ---------------------------------------------------------------- */
+.bc__node {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.bc.is-live .bc__node {
+  animation: bc-node-in 0.85s var(--ease-out) both;
+  animation-delay: var(--i);
+}
+
+@keyframes bc-node-in {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+  }
+  55% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.bc__node-halo {
+  fill: var(--bc-halo);
+}
+
+.bc__node-core {
+  fill: #f6feff;
+}
+
+.bc__node-flare {
+  fill-opacity: 0.95;
+}
+
+.bc__node--mid .bc__node-flare {
+  fill-opacity: 0.68;
+}
+
+.bc__node--minor .bc__node-flare {
+  fill-opacity: 0.38;
+}
+
+.bc.is-live .bc__node-halo,
+.bc.is-live .bc__node-flare {
+  animation: bc-twinkle var(--tw) ease-in-out infinite;
+  animation-delay: var(--twd);
+}
+
+@keyframes bc-twinkle {
+  0%,
+  100% {
+    opacity: 0.72;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes bc-aura {
+  from {
+    opacity: 0.5;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1.03);
+  }
+}
+
+/* Movimento reduzido: constelação desenhada, mas imóvel. ------------------ */
+@media (prefers-reduced-motion: reduce) {
+  .bc__aura,
+  .bc__node,
+  .bc__node-halo,
+  .bc__node-flare,
+  .bc__wire,
+  .bc__pulse {
+    animation: none !important;
+  }
+
+  .bc__node {
+    opacity: 1;
+    transform: none;
+  }
+
+  .bc__wire {
+    opacity: var(--w-op);
+    stroke-dashoffset: 0;
+  }
+
+  .bc__pulse {
+    display: none;
+  }
+
+  .bc__aura {
+    opacity: 0.7;
+    transform: none;
+  }
+}
