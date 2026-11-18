@@ -147,17 +147,11 @@ const websiteJsonLd = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  // Nada de `has-reveal` no HTML: nada nasce invisível esperando a hidratação.
+  // O RevealRoot marca só o que está fora da primeira tela.
   return (
-    <html
-      lang="pt-BR"
-      className={`${spaceGrotesk.variable} ${jetbrainsMono.variable} has-reveal`}
-    >
+    <html lang="pt-BR" className={`${spaceGrotesk.variable} ${jetbrainsMono.variable}`}>
       <body>
-        <noscript>
-          {/* Sem JS, nada fica escondido esperando a revelação. */}
-          <style>{`[data-reveal]{opacity:1!important;transform:none!important}`}</style>
-        </noscript>
-
         <a className="skip-link" href="#conteudo">
           Pular para o conteúdo
         </a>

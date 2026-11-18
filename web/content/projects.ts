@@ -144,7 +144,7 @@ export const projects: readonly Project[] = [
  * no celular, num diálogo antes de abrir — sem esconder a demo de ninguém.
  */
 export const pagflowNotice = {
-  hint: "Feito para desktop — no celular a prévia pode apresentar erros.",
+  hint: "Feito para desktop — no celular pode falhar.",
   label: "Aviso · prévia desktop",
   title: "O PagFlow é um app de desktop",
   body: "A prévia reproduz uma janela de 1280 × 960. No celular ela fica reduzida e pode apresentar erros: textos ilegíveis, controles fora de alcance e rolagem lateral. Para avaliar a experiência completa, abra em um computador.",

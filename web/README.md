@@ -97,8 +97,21 @@ A versão mobile foi revisada para parecer intencional, não um desktop encolhid
   no celular abre um `<dialog>` nativo (foco preso, `Esc`, backdrop) que explica
   o limite e deixa continuar. No desktop, nada muda: o link abre em nova aba.
 
+### Revelação no scroll (leia antes de mexer)
+
+O HTML estático sai **sem** `has-reveal` e sem `opacity: 0` em nada. Quem
+esconde os blocos é o `RevealRoot`, no mount, e só para o que está fora da
+primeira tela (`.is-pending`). A versão anterior escondia tudo pelo CSS: em rede
+móvel lenta a hidratação levava ~22 s e, nesse intervalo, a página mostrava
+apenas o título — o resto aparecia de uma vez no fim. Se precisar mexer nisso,
+mantenha a regra: **nada acima da dobra pode nascer invisível**, e o hero fica
+fora do reveal de propósito.
+
 Ferramentas: `python tools/mobile_audit.py --sections` mede rolagem horizontal,
 alvos < 44 px e salva as seções em 360, 390, 430, 768 e 844 × 390.
+`python tools/audit_probe.py` mede ritmo vertical, quebra do título, recorte de
+decoração e estado dos reveals em 320–430 px + paisagem, e salva as fatias em
+`tools/shots/probe/`; `python tools/compare_mobile.py` monta o antes/depois.
 
 ## Testes
 

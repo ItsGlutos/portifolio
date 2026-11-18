@@ -69,8 +69,10 @@ export function Header() {
     document.body.style.top = scrollY ? `-${scrollY}px` : "0px";
     document.body.classList.add("no-scroll");
 
-    const first = navRef.current?.querySelector<HTMLElement>("a, button");
-    first?.focus({ preventScroll: true });
+    /* O foco vai para o painel, não para o primeiro link: o leitor de tela
+       anuncia o menu igual, o teclado começa do topo, e quem abriu com o dedo
+       não vê um anel de foco que parece "item selecionado". */
+    navRef.current?.focus({ preventScroll: true });
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -196,6 +198,7 @@ export function Header() {
         className={cn("mobile-nav", open && "is-open")}
         id="mobile-nav"
         ref={navRef}
+        tabIndex={-1}
         onClick={(event) => {
           if ((event.target as HTMLElement).closest("a")) setOpen(false);
         }}

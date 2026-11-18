@@ -159,15 +159,6 @@ body {
   margin: 0;
   min-height: 100svh;
   background-color: var(--sky-top);
-  background-image: radial-gradient(
-      90vmax 90vmax at 84% -6%,
-      rgba(var(--sky-glow), var(--glow-strength)) 0%,
-      rgba(var(--sky-glow), 0) 100%
-    ),
-    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
   color: var(--text);
   font-family: var(--font-sans);
   font-size: var(--fs-body);
@@ -175,6 +166,22 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+}
+
+/* O céu fica numa camada fixa própria em vez de `background-attachment: fixed`,
+   que no iOS Safari obriga a repintar o fundo a cada frame do scroll. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+      90vmax 90vmax at 84% -6%,
+      rgba(var(--sky-glow), var(--glow-strength)) 0%,
+      rgba(var(--sky-glow), 0) 100%
+    ),
+    linear-gradient(180deg, var(--sky-top) 0%, var(--sky-bottom) 100%);
 }
 
 body.no-scroll {
@@ -2188,15 +2195,18 @@ button {
   color: var(--celeste);
 }
 
-/* Reveal ----------------------------------------------------------------- */
-.has-reveal [data-reveal] {
+/* Reveal -----------------------------------------------------------------
+   A classe `.is-pending` é aplicada pelo JS **só** em quem está fora da
+   primeira tela. O HTML estático chega visível: em rede móvel lenta nada fica
+   esperando a hidratação para aparecer. */
+[data-reveal].is-pending {
   opacity: 0;
   translate: 0 18px;
   transition: opacity 720ms var(--ease-out), translate 720ms var(--ease-out);
   transition-delay: calc(var(--reveal-delay, 0) * 80ms);
 }
 
-.has-reveal [data-reveal].is-visible {
+[data-reveal].is-pending.is-visible {
   opacity: 1;
   translate: 0 0;
 }
@@ -2465,7 +2475,7 @@ button {
     transition-duration: 0.01ms !important;
   }
 
-  .has-reveal [data-reveal] {
+  [data-reveal].is-pending {
     opacity: 1;
     translate: none;
   }
@@ -3749,5 +3759,341 @@ body.no-scroll {
   .hero__lead {
     font-size: 0.9375rem;
   }
+}
+
+/* ==========================================================================
+   Auditoria mobile — 18/11
+   Correções aprovadas depois da leitura em 320, 360, 390, 430 px e em
+   paisagem. Fica no fim do arquivo para vencer as camadas anteriores sem
+   reescrevê-las.
+   ========================================================================== */
+
+/* --- Fase 0: consertos de tela pequena ---------------------------------- */
+
+/* O título era 42,4 px em qualquer largura: as media queries miravam
+   `.hero__title` (0,1,0) e perdiam para `.hero h1` (0,1,1). */
+@media (max-width: 900px) {
+  .hero h1 {
+    font-size: clamp(2.2rem, 11.2vw, 2.65rem);
+  }
+}
+
+/* O cartão do retrato tinha `max-width: 340px` fixo: passava 40 px da tela em
+   320 px e, em 360, encostava na borda direita (20 px de folga só à esquerda).
+   Antes disso o próprio `hero__visual` era um grid com coluna fixa de 452 px,
+   então `100%` do cartão media 452 — não a largura da tela. */
+@media (max-width: 900px) {
+  .hero__visual {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .hero__tilt,
+  .portrait {
+    max-width: min(340px, 100%);
+  }
+}
+
+/* Órbitas: `114%` da coluna estourava as duas bordas e sobrava um arco solto
+   colado no vidro. Agora cabem inteiras e continuam emoldurando o cartão. */
+@media (max-width: 900px) {
+  .orbit,
+  .orbit--1,
+  .orbit--2 {
+    width: min(100vw - 12px, 430px);
+  }
+}
+
+/* Abas do cartão: 26 px de altura não é alvo de toque. */
+@media (max-width: 900px) {
+  .project__viewtab {
+    height: 44px;
+    padding: 0 14px;
+    font-size: 12.5px;
+  }
+
+  .project__viewtabs {
+    border-radius: 11px;
+  }
+}
+
+/* --- Fase 1: hierarquia e legibilidade ---------------------------------- */
+
+@media (max-width: 900px) {
+  /* Piso tipográfico: 40 trechos estavam abaixo de 11 px. */
+  .hero__eyebrow,
+  .hero__meta,
+  .section-label,
+  .project__kicker,
+  .project__index,
+  .project__live,
+  .project__year,
+  .footer__col h3,
+  .mobile-nav__foot p,
+  .portrait__top,
+  .portrait__bottom em,
+  .facts dt,
+  .project__tags .tag {
+    font-size: 11px;
+  }
+
+  .project__meta,
+  .project__read-meta,
+  .project__foot,
+  .footer__status {
+    font-size: 11.5px;
+  }
+
+  /* Caixa alta com 1,3–1,5 px de tracking vira textura em tela pequena:
+     metade do espaçamento, mesma linguagem. */
+  .hero__eyebrow,
+  .hero__meta,
+  .project__kicker,
+  .footer__col h3,
+  .portrait__top {
+    letter-spacing: 0.06em;
+  }
+
+  /* Descrição de cartão e de pilar a 13 px — menor que a introdução da seção. */
+  .project__desc,
+  .pillar p,
+  .facts dd {
+    font-size: 14.5px;
+    line-height: 1.55;
+  }
+
+  /* `.project h3` vencia `.project--wide h3` e entregava 19 px no maior
+     título da lista. */
+  .project.project--wide h3 {
+    font-size: clamp(1.5rem, 6.6vw, 2.125rem);
+    line-height: 1.14;
+  }
+
+  /* A citação era o 2º maior texto da página, acima de qualquer título. */
+  .pullquote {
+    font-size: 1.1875rem;
+    line-height: 1.44;
+  }
+
+  .pillar h3 {
+    font-size: 1.0625rem;
+  }
+}
+
+/* Contador do filtro: `opacity: .62` derrubava para 2,9:1 no item ativo. */
+.segmented__count {
+  opacity: 1;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.segmented__btn[aria-pressed="true"] .segmented__count {
+  color: #fff;
+}
+
+@media (max-width: 360px) {
+  .segmented__btn {
+    gap: 5px;
+    padding: 0 8px;
+    font-size: 11.5px;
+  }
+}
+
+/* Nota do PagFlow: uma linha em vez de duas, e sem soar como defeito do site. */
+.project__notice {
+  margin-top: 10px;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.project__notice svg {
+  width: 13px;
+  height: 13px;
+  margin-top: 1px;
+}
+
+/* --- Fase 2: ritmo ----------------------------------------------------- */
+
+@media (max-width: 680px) {
+  :root {
+    --header-h: calc(64px + var(--safe-top));
+  }
+
+  .section {
+    padding-block: 56px;
+  }
+
+  .hero + .section {
+    padding-top: 40px;
+  }
+
+  .hero {
+    padding-top: calc(var(--header-h) + 36px);
+  }
+
+  /* Rodapé: duas colunas em vez de uma tela e meia. */
+  .footer__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 20px;
+  }
+
+  .footer__brand {
+    grid-column: 1 / -1;
+  }
+
+  .footer__status {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding-block: 10px;
+  }
+
+  /* Cartões: menos caixa vazia em volta da arte. */
+  .project--wide .project__thumb {
+    min-height: 260px;
+  }
+
+  .project__rail {
+    min-height: 150px;
+    padding: 16px;
+  }
+
+  .project__rail-art {
+    max-width: 190px;
+  }
+
+  /* Faixa de constelação: 167 px quase invisíveis entre duas seções. */
+  .constellation-divider {
+    padding-block: 0 20px;
+  }
+}
+
+/* Menu mobile: sheet de altura cheia, mas com o conteúdo centrado — antes os
+   links ficavam colados no topo e sobravam 370 px de nada até o rodapé do
+   painel. Auto-altura não servia: o rodapé da página aparecia atrás. */
+@media (max-width: 900px) {
+  .mobile-nav {
+    inset: var(--header-h) 0 0;
+    max-height: none;
+  }
+
+  .mobile-nav nav {
+    justify-content: center;
+  }
+
+  .mobile-nav__foot {
+    margin-top: 0;
+  }
+}
+
+/* Em 320 px o hero pedia duas telas de rolagem antes de qualquer ação. */
+@media (max-width: 480px) {
+  /* Cada informação é uma unidade: sem isso o "·" fica no fim da linha e
+     "BRASIL" sobra sozinho na segunda. */
+  .hero__eyebrow > span:not(.sep) {
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 400px) {
+  .hero {
+    padding-top: calc(var(--header-h) + 28px);
+  }
+
+  .portrait__imgwrap {
+    height: 258px;
+  }
+}
+
+/* Paisagem: 76 px de header em 390 px de altura é 19,5% da tela. */
+@media (orientation: landscape) and (max-height: 520px) {
+  :root {
+    --header-h: calc(56px + var(--safe-top));
+  }
+
+  .hero {
+    padding-top: calc(var(--header-h) + 24px);
+    padding-bottom: 32px;
+  }
+
+  .portrait {
+    max-width: 280px;
+  }
+
+  .hero__tilt {
+    max-width: min(280px, 100%);
+  }
+
+  .portrait__imgwrap {
+    height: 208px;
+  }
+
+  /* Vale também para paisagem estreita (667×375), onde a regra de 900 px
+     venceria a de `max-height` por vir depois. */
+  .hero h1 {
+    font-size: clamp(1.8rem, 5.6vw, 2.35rem);
+  }
+}
+
+/* Com largura de sobra, o retrato volta para o lado do texto: empilhado, o
+   hero ocupava 2,7 telas em 844×390. */
+@media (orientation: landscape) and (max-height: 520px) and (min-width: 700px) {
+  .hero__grid {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: 32px;
+  }
+
+  .hero__visual {
+    order: 0;
+    margin-top: 0;
+  }
+
+  .orbit,
+  .orbit--1,
+  .orbit--2 {
+    width: min(42vw, 300px);
+  }
+
+  .hero h1 {
+    font-size: clamp(1.9rem, 4.4vw, 2.35rem);
+  }
+
+  .hero__lead {
+    margin-top: 16px;
+    font-size: 0.9375rem;
+  }
+
+  .hero__actions {
+    margin-top: 22px;
+  }
+
+  .hero__meta {
+    margin-top: 20px;
+  }
+}
+
+/* --- Fase 3: interação -------------------------------------------------- */
+
+/* Reveal mais curto no celular: o conteúdo chega junto com o dedo. */
+@media (max-width: 900px) {
+  [data-reveal].is-pending {
+    translate: 0 10px;
+    transition-duration: 0.45s;
+    transition-delay: calc(var(--reveal-delay, 0) * 60ms);
+  }
+
+  .hero__title .line > span {
+    animation-duration: 0.7s;
+  }
+}
+
+/* O diálogo e o painel do menu recebem foco por script: sem anel que pareça
+   "item selecionado" em quem abriu com o dedo. */
+.pagflow-dialog:focus,
+.mobile-nav:focus {
+  outline: none;
 }
 

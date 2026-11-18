@@ -43,6 +43,9 @@ export function PagflowCta({ href, label }: { href: string; label: string }) {
 
     event.preventDefault();
     dialog.showModal();
+    /* Foco no próprio diálogo (não no X): sem anel de foco que parece
+       "selecionado" em quem abriu tocando na tela. */
+    dialog.focus({ preventScroll: true });
   }
 
   function close() {
@@ -81,6 +84,7 @@ export function PagflowCta({ href, label }: { href: string; label: string }) {
           <dialog
             ref={dialogRef}
             className="pagflow-dialog"
+            tabIndex={-1}
             aria-labelledby={titleId}
             aria-describedby={bodyId}
             onClose={() => linkRef.current?.focus({ preventScroll: true })}

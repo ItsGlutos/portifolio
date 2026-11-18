@@ -42,9 +42,7 @@ export function Contact() {
               );
             })}
           </div>
-          <p className="contact__hint">
-            Cajamar, São Paulo · Brasil. Prefere LinkedIn? Também estou por lá.
-          </p>
+          <p className="contact__hint">Cajamar, São Paulo · Brasil.</p>
         </div>
       </div>
     </section>
